@@ -1,0 +1,8 @@
+# Если эту папку временно выкладываете на URL «только для клиента», замените на:
+# User-agent: *
+# Disallow: /
+
+User-agent: *
+Allow: /
+
+Sitemap: https://greengrouplogistics.com/sitemap.xml

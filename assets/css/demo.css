@@ -1,0 +1,44 @@
+/* Demo preview layer — удалите подключение demo.css и разметку баннера перед выкладкой на домен */
+
+:root {
+  --demo-bar-h: 44px;
+}
+
+body.demo-mode {
+  padding-top: var(--demo-bar-h);
+}
+
+body.demo-mode .site-header {
+  top: var(--demo-bar-h);
+}
+
+body.demo-mode .skip-link:focus {
+  top: calc(var(--demo-bar-h) + 0.5rem);
+}
+
+.demo-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  min-height: var(--demo-bar-h);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem 1rem;
+  flex-wrap: wrap;
+  padding: 0.4rem 1rem;
+  background: linear-gradient(100deg, #7c2d12 0%, #c2410c 45%, #b45309 100%);
+  color: #fff7ed;
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.35;
+  text-align: center;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.18);
+}
+
+.demo-banner span {
+  max-width: 52rem;
+}
