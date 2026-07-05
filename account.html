@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My account | Green Logistics</title>
+  <meta name="robots" content="noindex, follow">
+  <meta name="description" content="Your Green Logistics portal: shipment history for customers and carriers.">
+  <link rel="icon" type="image/png" href="assets/from-site/Logo.png">
+  <link rel="canonical" href="https://greengrouplogistics.com/account.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <link rel="stylesheet" href="assets/css/demo.css">
+  <style>
+    .portal-account-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: 1.25rem; }
+    .portal-role-badge { display: inline-block; font-size: .75rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: .35rem .65rem; border-radius: 999px; background: rgba(34, 139, 34, 0.15); color: #166534; border: 1px solid rgba(22, 101, 52, 0.25); }
+    .portal-role-badge.is-carrier { background: rgba(59, 130, 246, 0.12); color: #1d4ed8; border-color: rgba(29, 78, 216, 0.25); }
+    .portal-table-wrap { overflow-x: auto; border: 1px solid var(--color-border); border-radius: var(--radius); background: var(--color-surface); }
+    .portal-table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+    .portal-table th, .portal-table td { padding: .65rem .85rem; text-align: left; border-bottom: 1px solid var(--color-border); }
+    .portal-table th { background: rgba(0,0,0,.04); font-weight: 600; white-space: nowrap; }
+    .portal-table tr:last-child td { border-bottom: none; }
+    .portal-empty { padding: 1.5rem; text-align: center; color: var(--color-ink-muted); }
+    .portal-actions { margin-top: 1.5rem; display: flex; gap: .75rem; flex-wrap: wrap; }
+  </style>
+</head>
+<body data-portal-page="account">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header" data-header>
+    <div class="container header-inner">
+      <div class="logo logo--header-brand">
+        <a class="logo__home" href="index.html" aria-label="Green Logistics home">
+          <img class="logo-img logo-img--header" src="assets/from-site/Logo.png" width="220" height="60" alt="Green Logistics">
+        </a>
+      </div>
+      <button type="button" class="nav-toggle" aria-expanded="false" aria-controls="site-nav" data-nav-toggle>
+        <span class="nav-toggle-bar"></span>
+        <span class="sr-only">Menu</span>
+      </button>
+      <nav id="site-nav" class="site-nav" data-nav>
+        <ul class="nav-list">
+          <li><a href="index.html">Home</a></li>
+          <li class="nav-item has-dropdown">
+            <button class="nav-link-btn" type="button" data-dropdown-toggle aria-expanded="false">Option</button>
+            <div class="dropdown-menu mega-menu">
+              <a href="option.html">Overview</a>
+              <a href="contact.html">Request a freight quote</a>
+              <a href="help-center.html">Help center</a>
+              <a href="service-center-lookup.html">Service center lookup</a>
+              <a href="forms-library.html">Forms library</a>
+              <a href="transit-calculator.html">Transit time calculator</a>
+              <a href="density-class-calculator.html">Density and class calculator</a>
+            </div>
+          </li>
+          <li class="nav-item has-dropdown">
+            <button class="nav-link-btn" type="button" data-dropdown-toggle aria-expanded="false">Services</button>
+            <div class="dropdown-menu mega-menu mega-menu--services">
+              <a href="services.html">Overview</a>
+              <a href="services.html#heavy">Heavy hauling</a>
+              <a href="services.html#car">Car hauling</a>
+              <a href="services.html#boat">Boat hauling</a>
+              <a href="services.html#freight">Freight</a>
+            </div>
+          </li>
+          <li class="nav-item has-dropdown">
+            <button class="nav-link-btn" type="button" data-dropdown-toggle aria-expanded="false">Company</button>
+            <div class="dropdown-menu">
+              <a href="about.html">About us</a>
+              <a href="contact.html">Contact</a>
+              <a href="https://g.page/r/CYnYasDBg-hSEAE" target="_blank" rel="noopener noreferrer">Google Business</a>
+            </div>
+          </li>
+          <li class="nav-item has-dropdown">
+            <button class="nav-link-btn" type="button" data-dropdown-toggle aria-expanded="false">Blog</button>
+            <div class="dropdown-menu mega-menu mega-menu--blog">
+              <a href="blog.html">Blog overview</a>
+              <a href="blog/precision-flatbed-oversized-modular.html">Flatbed &amp; modular structures</a>
+              <a href="blog/heavy-haul-oversized-equipment-precision.html">Heavy haul precision</a>
+              <a href="blog/efficient-commercial-industrial-equipment-transport.html">Commercial equipment</a>
+              <a href="blog/specialized-military-equipment-heavy-haul.html">Military-style heavy haul</a>
+              <a href="blog/secure-container-transportation-solutions.html">Container transport</a>
+              <a href="blog/heavy-equipment-dozer-hauling.html">Heavy equipment &amp; dozer</a>
+            </div>
+          </li>
+          <li class="nav-item has-dropdown">
+            <button class="nav-link-btn" type="button" data-dropdown-toggle aria-expanded="false">Terms and Conditions</button>
+            <div class="dropdown-menu">
+              <a href="terms.html">Full terms</a>
+              <a href="terms.html#agreement-to-terms">Agreement to terms</a>
+              <a href="terms.html#payment-terms">Payment terms</a>
+              <a href="terms.html#sms-terms">SMS terms</a>
+              <a href="contact.html">Legal / billing questions</a>
+            </div>
+          </li>
+          <li class="nav-phones">
+            <a href="tel:+18883086865" class="nav-phone" aria-label="Call toll-free (888) 308-6865">(888) 308-6865</a>
+            <a href="tel:+12677035313" class="nav-phone" aria-label="Call (267) 703-5313">(267) 703-5313</a>
+          </li>
+          <li class="nav-auth">
+            <button type="button" class="nav-auth-btn nav-auth-btn--outline" data-register-modal>REGISTER</button>
+            <a href="login.html" class="nav-auth-btn nav-auth-btn--primary" data-login-link>LOG IN</a>
+          </li>
+          <li class="nav-social-top" aria-label="Social media quick links">
+                <a href="https://www.facebook.com/share/1BygbP16tG/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" title="Facebook" aria-label="Facebook">
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M13.5 22v-8h2.7l.4-3h-3.1V9.2c0-.9.3-1.6 1.6-1.6h1.7V4.9c-.3 0-1.3-.1-2.4-.1-2.4 0-4.1 1.5-4.1 4.3V11H8v3h2.3v8h3.2z"/></svg>
+                </a>
+                <a href="https://www.instagram.com/green_logisticsllc?igsh=eGRlbHQ2ZGI5dXky&utm_source=qr" target="_blank" rel="noopener noreferrer" title="Instagram" aria-label="Instagram">
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7.8 3h8.4A4.8 4.8 0 0 1 21 7.8v8.4a4.8 4.8 0 0 1-4.8 4.8H7.8A4.8 4.8 0 0 1 3 16.2V7.8A4.8 4.8 0 0 1 7.8 3Zm0 1.8A3 3 0 0 0 4.8 7.8v8.4a3 3 0 0 0 3 3h8.4a3 3 0 0 0 3-3V7.8a3 3 0 0 0-3-3H7.8Zm8.9 1.3a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2ZM12 7.6a4.4 4.4 0 1 1 0 8.8 4.4 4.4 0 0 1 0-8.8Zm0 1.8a2.6 2.6 0 1 0 0 5.2 2.6 2.6 0 0 0 0-5.2Z"/></svg>
+                </a>
+                <a href="https://www.linkedin.com/company/greengrouplogisticsllc/" target="_blank" rel="noopener noreferrer" title="LinkedIn" aria-label="LinkedIn">
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6.2 8.8a1.7 1.7 0 1 1 0-3.4 1.7 1.7 0 0 1 0 3.4ZM4.7 10h3v9.3h-3V10Zm5 0h2.8v1.3h.1c.4-.8 1.4-1.6 3-1.6 3.2 0 3.8 2.1 3.8 4.8v4.8h-3v-4.3c0-1 0-2.3-1.4-2.3s-1.6 1.1-1.6 2.2v4.4h-3V10Z"/></svg>
+                </a>
+                <a href="https://wa.me/12677035313?text=Hello%20Green%20Logistics%2C%20I%20need%20a%20quote." target="_blank" rel="noopener noreferrer" title="WhatsApp" aria-label="WhatsApp">
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 11.8A8.8 8.8 0 0 1 7 19.6L3 21l1.5-3.8A8.8 8.8 0 1 1 20 11.8Zm-8.8-7.1a7.1 7.1 0 0 0-6.2 10.6l.2.4-.9 2.2 2.3-.8.4.2A7.1 7.1 0 1 0 11.2 4.7Zm4.2 9c-.2-.1-1.2-.6-1.4-.6s-.3-.1-.4.1l-.6.7c-.1.2-.2.2-.4.1a5.8 5.8 0 0 1-1.7-1.1 6.4 6.4 0 0 1-1.2-1.5c-.1-.2 0-.3.1-.4l.3-.3.2-.3.1-.3c0-.1 0-.2-.1-.3l-.6-1.4c-.2-.4-.3-.4-.4-.4h-.4c-.1 0-.3.1-.4.2-.2.2-.7.7-.7 1.6 0 .9.7 1.9.8 2 .1.1 1.4 2.1 3.3 2.9.5.2.8.4 1.1.5.5.2 1 .2 1.3.1.4-.1 1.2-.5 1.4-.9.2-.4.2-.8.1-.9 0 0-.1-.1-.3-.2Z"/></svg>
+                </a>
+              </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="page-hero">
+      <div class="container">
+        <p class="eyebrow">Portal</p>
+        <h1>My account</h1>
+        <p class="lead narrow">Shipment and quote activity tied to your registered email.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="portal-account-head">
+          <div>
+            <h2 style="margin: 0 0 .35rem; font-size: 1.25rem;" id="portal-account-name">—</h2>
+            <p style="margin: 0; color: var(--color-ink-muted); font-size: .95rem;" id="portal-account-email">—</p>
+          </div>
+          <span class="portal-role-badge" id="portal-account-role" aria-live="polite">—</span>
+        </div>
+
+        <h3 style="margin: 0 0 .75rem; font-size: 1rem;">Shipments &amp; requests</h3>
+        <p class="fine-print" style="margin: 0 0 1rem;">Rows appear when you request a quote on the contact page using this email (after you have registered), or when your team adds loads to the connected system in a future integration.</p>
+
+        <div class="portal-table-wrap">
+          <p id="portal-shipments-empty" class="portal-empty" hidden>No shipments or quote requests yet.</p>
+          <table class="portal-table" aria-label="Your shipments">
+            <thead>
+              <tr>
+                <th>Reference</th>
+                <th>Date</th>
+                <th>Lane</th>
+                <th>Equipment</th>
+                <th>Status</th>
+                <th>Role</th>
+              </tr>
+            </thead>
+            <tbody id="portal-shipments-body"></tbody>
+          </table>
+        </div>
+
+        <div class="portal-actions">
+          <a href="contact.html" class="btn btn-primary">Request a freight quote</a>
+          <a href="#" class="btn btn-ghost" id="portal-logout">Log out</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div>
+        <div class="logo logo-footer logo--split">
+        <a class="logo__mark" href="index.html" aria-label="Green Logistics home"><img class="logo-img" src="assets/from-site/Logo.png" width="56" height="56" alt=""></a>
+        <a href="https://g.page/r/CYnYasDBg-hSEAE" class="logo__google company-home-link" target="_blank" rel="noopener noreferrer" aria-label="Green Logistics on Google"><span class="logo-text">Green <span class="logo-accent">Logistics</span></span></a>
+        </div>
+        <p class="footer-tagline">Leading freight brokerage with comprehensive transportation solutions across North America.</p>
+        <div class="social-row">
+          <a href="https://www.facebook.com/share/1BygbP16tG/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" title="Facebook">f</a>
+          <a href="https://www.instagram.com/green_logisticsllc?igsh=eGRlbHQ2ZGI5dXky&utm_source=qr" target="_blank" rel="noopener noreferrer" title="Instagram">ig</a>
+          <a href="https://wa.me/12677035313?text=Hello%20Green%20Logistics%2C%20I%20need%20a%20quote." target="_blank" rel="noopener noreferrer" title="WhatsApp">wa</a>
+          <a href="https://www.linkedin.com/company/greengrouplogisticsllc/" target="_blank" rel="noopener noreferrer" title="LinkedIn">li</a>
+        </div>
+      </div>
+      <div>
+        <h3 class="footer-heading">Quick links</h3>
+        <ul class="footer-links">
+          <li><a href="about.html">About us</a></li>
+          <li><a href="services.html">Services</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="footer-heading">Contact</h3>
+        <ul class="footer-contact-list">
+          <li>121 Frog Hollow Road<br>Churchville, PA 18966</li>
+          <li><a href="tel:+18883086865">(888) 308-6865</a></li><li><a href="tel:+12677035313">(267) 703-5313</a></li>
+          <li><a href="mailto:info@greengrouplogistics.com">info@greengrouplogistics.com</a></li>
+          <li>Mon - Sun: 5AM - 8PM</li>
+        </ul>
+      </div>
+    </div>
+    <div class="container footer-bottom">
+      <p class="footer-copy">© <span data-year></span> <a href="https://g.page/r/CYnYasDBg-hSEAE" class="company-home-link" target="_blank" rel="noopener noreferrer">Green Logistics</a>.</p>
+      <p class="footer-phones"><a href="tel:+18883086865">(888) 308-6865</a><span class="footer-phones-sep" aria-hidden="true"> · </span><a href="tel:+12677035313">(267) 703-5313</a></p>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js" defer></script>
+</body>
+</html>
