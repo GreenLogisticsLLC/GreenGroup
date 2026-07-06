@@ -16,30 +16,8 @@ jobs:
       - name: Write deploy marker
         run: echo "${{ github.sha }}" > deploy-version.txt
 
-      - name: Deploy via FTPS to public_html
-        id: ftps
-        continue-on-error: true
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftps
-          port: 21
-          security: loose
-          server-dir: public_html/
-          local-dir: ./
-          log-level: verbose
-          exclude: |
-            **/.git/**
-            **/.github/**
-            **/tools/**
-            **/.gitignore
-
-      - name: Deploy via SFTP (port 22)
+      - name: Deploy via SFTP to public_html
         id: sftp
-        if: steps.ftps.outcome == 'failure'
-        continue-on-error: true
         uses: wlixcc/SFTP-Deploy-Action@v1.2.4
         with:
           server: ${{ secrets.FTP_SERVER }}
@@ -50,24 +28,36 @@ jobs:
           remote_path: /home/ijh19zqesepn/public_html/
           sftp_only: true
 
-      - name: Deploy status
-        run: |
-          if [ "${{ steps.ftps.outcome }}" = "success" ] || [ "${{ steps.sftp.outcome }}" = "success" ]; then
-            echo "Site files uploaded to public_html."
-            exit 0
-          fi
-          echo "::error::FTP/SFTP deploy failed. Check FTP_PASSWORD secret or use cPanel cron."
-          exit 1
+      - name: Deploy via FTPS to document root
+        id: ftps
+        if: failure()
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          security: loose
+          server-dir: ./
+          local-dir: ./
+          state-name: greengroup-root
+          log-level: verbose
+          exclude: |
+            **/.git/**
+            **/.github/**
+            **/tools/**
+            **/.gitignore
 
       - name: Verify live site updated
         continue-on-error: true
         run: |
           sleep 20
           body=$(curl -fsSL "https://greengrouplogistics.com/greenos.html?cachebust=$(date +%s)" || true)
+          ver=$(curl -fsSL "https://greengrouplogistics.com/deploy-version.txt?cachebust=$(date +%s)" || true)
+          echo "deploy-version.txt: ${ver:-not found}"
           if echo "$body" | grep -q 'greenos-portal'; then
             echo "Live site shows new GreenOS design."
             exit 0
           fi
-          echo "::warning::greenos.html may still be cached or cPanel cron has not synced yet."
-          ver=$(curl -fsSL "https://greengrouplogistics.com/deploy-version.txt?cachebust=$(date +%s)" || true)
-          echo "deploy-version.txt on live: ${ver:-not found}"
+          echo "::warning::GreenOS page not updated yet. Enable cPanel cron if FTP cannot overwrite files."
