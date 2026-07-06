@@ -3,7 +3,7 @@
 # Deploy copies FROM the repo checkout (pwd) INTO public_html.
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/jh1gzqesepn/public_html/
+    - export DEPLOYPATH=/home/ijh19zqesepn/public_html/
     - export REPOPATH=$(pwd)
     - /bin/cp -R $REPOPATH/assets $DEPLOYPATH
     - /bin/cp -R $REPOPATH/blog $DEPLOYPATH
