@@ -10,21 +10,34 @@ jobs:
   ftp-deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: Verify FTP secrets
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          missing=0
+          if [ -z "$FTP_SERVER" ]; then echo "::error::Secret FTP_SERVER is empty. Add it in GitHub -> Settings -> Secrets -> Actions"; missing=1; fi
+          if [ -z "$FTP_USERNAME" ]; then echo "::error::Secret FTP_USERNAME is empty"; missing=1; fi
+          if [ -z "$FTP_PASSWORD" ]; then echo "::error::Secret FTP_PASSWORD is empty"; missing=1; fi
+          if [ "$missing" -eq 1 ]; then exit 1; fi
+          echo "FTP secrets are set."
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Deploy to public_html via FTP
+      - name: Deploy to public_html via FTPS
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftp
+          protocol: ftps
           port: 21
-          # If FTP opens directly in public_html, use server-dir: ./
-          # If FTP opens in home folder, use server-dir: public_html/
+          security: loose
           server-dir: public_html/
           local-dir: ./
+          log-level: verbose
           exclude: |
             **/.git/**
             **/.github/**
