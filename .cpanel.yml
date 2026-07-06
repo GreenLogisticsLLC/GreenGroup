@@ -1,31 +1,30 @@
 ---
-# IMPORTANT: Set DEPLOYPATH to your domain document root from cPanel -> Domains.
-# Common values:
-#   /home/jh1gzqesepn/public_html/
-#   /home/jh1gzqesepn/greengrouplogistics.com/
-#   /home/jh1gzqesepn/public_html/greengrouplogistics.com/
+# public_html = live site. Git checkout lives in a separate folder on the server.
+# Deploy copies FROM the repo checkout (pwd) INTO public_html.
 deployment:
   tasks:
     - export DEPLOYPATH=/home/jh1gzqesepn/public_html/
-    - /bin/cp -R assets $DEPLOYPATH
-    - /bin/cp -R blog $DEPLOYPATH
-    - /bin/cp index.html $DEPLOYPATH
-    - /bin/cp about.html $DEPLOYPATH
-    - /bin/cp account.html $DEPLOYPATH
-    - /bin/cp blog.html $DEPLOYPATH
-    - /bin/cp contact.html $DEPLOYPATH
-    - /bin/cp density-class-calculator.html $DEPLOYPATH
-    - /bin/cp forms-library.html $DEPLOYPATH
-    - /bin/cp greenos.html $DEPLOYPATH
-    - /bin/cp greenos-dashboard.html $DEPLOYPATH
-    - /bin/cp help-center.html $DEPLOYPATH
-    - /bin/cp login.html $DEPLOYPATH
-    - /bin/cp option.html $DEPLOYPATH
-    - /bin/cp service-center-lookup.html $DEPLOYPATH
-    - /bin/cp services.html $DEPLOYPATH
-    - /bin/cp terms.html $DEPLOYPATH
-    - /bin/cp thank-you.html $DEPLOYPATH
-    - /bin/cp transit-calculator.html $DEPLOYPATH
-    - /bin/cp robots.txt $DEPLOYPATH
-    - /bin/cp sitemap.xml $DEPLOYPATH
-    - /bin/cp deploy-check.txt $DEPLOYPATH
+    - export REPOPATH=$(pwd)
+    - /bin/cp -R $REPOPATH/assets $DEPLOYPATH
+    - /bin/cp -R $REPOPATH/blog $DEPLOYPATH
+    - /bin/cp $REPOPATH/index.html $DEPLOYPATH
+    - /bin/cp $REPOPATH/about.html $DEPLOYPATH
+    - /bin/cp $REPOPATH/account.html $DEPLOYPATH
+    - /bin/cp $REPOPATH/blog.html $DEPLOYPATH
+    - /bin/cp $REPOPATH/contact.html $DEPLOYPATH
+    - /bin/cp $REPOPATH/density-class-calculator.html $DEPLOYPATH
+    - /bin/cp $REPOPATH/forms-library.html $DEPLOYPATH
+    - /bin/cp $REPOPATH/greenos.html $DEPLOYPATH
+    - /bin/cp $REPOPATH/greenos-dashboard.html $DEPLOYPATH
+    - /bin/cp $REPOPATH/help-center.html $DEPLOYPATH
+    - /bin/cp $REPOPATH/login.html $DEPLOYPATH
+    - /bin/cp $REPOPATH/option.html $DEPLOYPATH
+    - /bin/cp $REPOPATH/service-center-lookup.html $DEPLOYPATH
+    - /bin/cp $REPOPATH/services.html $DEPLOYPATH
+    - /bin/cp $REPOPATH/terms.html $DEPLOYPATH
+    - /bin/cp $REPOPATH/thank-you.html $DEPLOYPATH
+    - /bin/cp $REPOPATH/transit-calculator.html $DEPLOYPATH
+    - /bin/cp $REPOPATH/robots.txt $DEPLOYPATH
+    - /bin/cp $REPOPATH/sitemap.xml $DEPLOYPATH
+    - /bin/cp $REPOPATH/deploy-check.txt $DEPLOYPATH
+    - /bin/sh -c '/bin/date >> '"$DEPLOYPATH"'deploy-check.txt'
