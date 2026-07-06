@@ -27,4 +27,5 @@ deployment:
     - /bin/cp $REPOPATH/robots.txt $DEPLOYPATH
     - /bin/cp $REPOPATH/sitemap.xml $DEPLOYPATH
     - /bin/cp $REPOPATH/deploy-check.txt $DEPLOYPATH
+    - /bin/cp $REPOPATH/deploy-version.txt $DEPLOYPATH
     - /bin/sh -c '/bin/date >> '"$DEPLOYPATH"'deploy-check.txt'

@@ -13,6 +13,6 @@ else
   /bin/cp -R "$REPO/assets" "$PUBLIC/"
   /bin/cp -R "$REPO/blog" "$PUBLIC/"
   /bin/cp "$REPO"/*.html "$PUBLIC/" 2>/dev/null || true
-  /bin/cp "$REPO/robots.txt" "$REPO/sitemap.xml" "$REPO/deploy-check.txt" "$PUBLIC/" 2>/dev/null || true
+  /bin/cp "$REPO/robots.txt" "$REPO/sitemap.xml" "$REPO/deploy-check.txt" "$REPO/deploy-version.txt" "$PUBLIC/" 2>/dev/null || true
 fi
 echo "Deployed $(git rev-parse --short HEAD) at $(date)" >> "$PUBLIC/deploy-check.txt"
