@@ -3,28 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My account | Green Logistics</title>
+  <title>My shipments | Green Logistics</title>
   <meta name="robots" content="noindex, follow">
-  <meta name="description" content="Your Green Logistics portal: shipment history for customers and carriers.">
+  <meta name="description" content="View your Green Logistics shipment history: lanes, miles, commodities, and costs.">
   <link rel="icon" type="image/png" href="assets/from-site/Logo.png">
   <link rel="canonical" href="https://greengrouplogistics.com/account.html">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/styles.css">
+  <link rel="stylesheet" href="assets/css/styles.css?v=13">
   <link rel="stylesheet" href="assets/css/demo.css">
-  <style>
-    .portal-account-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: 1.25rem; }
-    .portal-role-badge { display: inline-block; font-size: .75rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: .35rem .65rem; border-radius: 999px; background: rgba(34, 139, 34, 0.15); color: #166534; border: 1px solid rgba(22, 101, 52, 0.25); }
-    .portal-role-badge.is-carrier { background: rgba(59, 130, 246, 0.12); color: #1d4ed8; border-color: rgba(29, 78, 216, 0.25); }
-    .portal-table-wrap { overflow-x: auto; border: 1px solid var(--color-border); border-radius: var(--radius); background: var(--color-surface); }
-    .portal-table { width: 100%; border-collapse: collapse; font-size: .92rem; }
-    .portal-table th, .portal-table td { padding: .65rem .85rem; text-align: left; border-bottom: 1px solid var(--color-border); }
-    .portal-table th { background: rgba(0,0,0,.04); font-weight: 600; white-space: nowrap; }
-    .portal-table tr:last-child td { border-bottom: none; }
-    .portal-empty { padding: 1.5rem; text-align: center; color: var(--color-ink-muted); }
-    .portal-actions { margin-top: 1.5rem; display: flex; gap: .75rem; flex-wrap: wrap; }
-  </style>
 </head>
 <body data-portal-page="account">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -123,11 +111,11 @@
   </header>
 
   <main id="main">
-    <section class="page-hero">
+    <section class="page-hero page-hero--portal">
       <div class="container">
-        <p class="eyebrow">Portal</p>
-        <h1>My account</h1>
-        <p class="lead narrow">Shipment and quote activity tied to your registered email.</p>
+        <p class="eyebrow">Customer portal</p>
+        <h1>Your shipments</h1>
+        <p class="lead narrow">Every load we have moved for you — origin and destination, miles, commodity, and cost.</p>
       </div>
     </section>
 
@@ -135,34 +123,40 @@
       <div class="container">
         <div class="portal-account-head">
           <div>
-            <h2 style="margin: 0 0 .35rem; font-size: 1.25rem;" id="portal-account-name">—</h2>
-            <p style="margin: 0; color: var(--color-ink-muted); font-size: .95rem;" id="portal-account-email">—</p>
+            <h2 class="portal-account-title" id="portal-account-name">—</h2>
+            <p class="portal-account-email" id="portal-account-email">—</p>
           </div>
           <span class="portal-role-badge" id="portal-account-role" aria-live="polite">—</span>
         </div>
 
-        <h3 style="margin: 0 0 .75rem; font-size: 1rem;">Shipments &amp; requests</h3>
-        <p class="fine-print" style="margin: 0 0 1rem;">Rows appear when you request a quote on the contact page using this email (after you have registered), or when your team adds loads to the connected system in a future integration.</p>
-
-        <div class="portal-table-wrap">
-          <p id="portal-shipments-empty" class="portal-empty" hidden>No shipments or quote requests yet.</p>
-          <table class="portal-table" aria-label="Your shipments">
-            <thead>
-              <tr>
-                <th>Reference</th>
-                <th>Date</th>
-                <th>Lane</th>
-                <th>Equipment</th>
-                <th>Status</th>
-                <th>Role</th>
-              </tr>
-            </thead>
-            <tbody id="portal-shipments-body"></tbody>
-          </table>
+        <div class="portal-stats" aria-label="Shipment summary">
+          <div class="portal-stat">
+            <span class="portal-stat__value" id="portal-stat-loads">0</span>
+            <span class="portal-stat__label">Loads</span>
+          </div>
+          <div class="portal-stat">
+            <span class="portal-stat__value" id="portal-stat-miles">—</span>
+            <span class="portal-stat__label">Total miles</span>
+          </div>
+          <div class="portal-stat">
+            <span class="portal-stat__value" id="portal-stat-spend">—</span>
+            <span class="portal-stat__label">Total cost</span>
+          </div>
         </div>
 
+        <h3 class="portal-section-title">Shipment history</h3>
+        <p class="portal-section-note">Loads appear here when Green Logistics adds them to your account, or when you request a quote while logged in.</p>
+
+        <div id="portal-shipments-empty" class="portal-empty" hidden>
+          <p><strong>No shipments yet.</strong></p>
+          <p>When we book or complete a move for you, it will show up here with full lane and pricing details.</p>
+          <a href="contact.html" class="btn btn-primary" style="margin-top: 1rem;">Request a freight quote</a>
+        </div>
+
+        <div id="portal-shipments-list" class="portal-shipments-list" hidden></div>
+
         <div class="portal-actions">
-          <a href="contact.html" class="btn btn-primary">Request a freight quote</a>
+          <a href="contact.html" class="btn btn-primary">Request another quote</a>
           <a href="#" class="btn btn-ghost" id="portal-logout">Log out</a>
         </div>
       </div>
@@ -208,6 +202,7 @@
     </div>
   </footer>
 
+  <script src="assets/js/portal-shipments-data.js" defer></script>
   <script src="assets/js/main.js" defer></script>
 </body>
 </html>

@@ -89,13 +89,29 @@
       },
       listShipments: function (email) {
         email = normEmail(email);
-        return shipmentList()
-          .filter(function (row) {
+        var fromStore = shipmentList().filter(function (row) {
+          return normEmail(row.ownerEmail) === email;
+        });
+        var fromConfig = [];
+        var cfg = window.GL_PORTAL_SHIPMENTS_DATA;
+        if (Array.isArray(cfg)) {
+          fromConfig = cfg.filter(function (row) {
             return normEmail(row.ownerEmail) === email;
-          })
-          .sort(function (a, b) {
-            return String(b.createdAt || "").localeCompare(String(a.createdAt || ""));
           });
+        }
+        var seen = {};
+        var merged = [];
+        fromConfig.concat(fromStore).forEach(function (row) {
+          var key = String(row.ref || row.id || "") + "|" + String(row.date || row.createdAt || "");
+          if (seen[key]) return;
+          seen[key] = true;
+          merged.push(row);
+        });
+        return merged.sort(function (a, b) {
+          var da = String(a.date || a.createdAt || "");
+          var db = String(b.date || b.createdAt || "");
+          return db.localeCompare(da);
+        });
       },
       addShipmentFromQuote: function (email, messageText) {
         email = normEmail(email);
@@ -1444,11 +1460,22 @@
       });
     }
 
-    function finishRegistration(kind) {
-      registerSetStatus(kind, "Thanks. Registration sent successfully.", false);
+    function finishRegistration(kind, fd) {
+      registerSetStatus(kind, "Thanks! Opening your account…", false);
       window.setTimeout(function () {
         registerCloseModal();
-        window.location.href = "thank-you.html?type=registration";
+        var prefix = "";
+        var home = document.querySelector(".logo__home");
+        if (home) {
+          var h = home.getAttribute("href") || "";
+          if (h.indexOf("../") === 0) prefix = "../";
+        }
+        if (fd && fd.get("email") && fd.get("portalPassword")) {
+          GLPortal.login(fd.get("email"), fd.get("portalPassword"));
+          window.location.href = prefix + "account.html";
+          return;
+        }
+        window.location.href = prefix + "login.html";
       }, 700);
     }
 
@@ -1571,7 +1598,7 @@
             return sendRegistration(payload).catch(function () {
               return false;
             }).then(function () {
-              finishRegistration("customer");
+              finishRegistration("customer", fd);
             });
           },
           function () {
@@ -1646,7 +1673,7 @@
             return sendRegistration(payload).catch(function () {
               return false;
             }).then(function () {
-              finishRegistration("carrier");
+              finishRegistration("carrier", fd);
             });
           },
           function () {
@@ -1685,7 +1712,7 @@
     links.forEach(function (a) {
       if (session) {
         a.setAttribute("href", prefix + "account.html");
-        a.textContent = "MY ACCOUNT";
+        a.textContent = "MY SHIPMENTS";
       } else {
         a.setAttribute("href", prefix + "login.html");
         a.textContent = "LOG IN";
@@ -1735,8 +1762,11 @@
       var nameEl = document.getElementById("portal-account-name");
       var roleEl = document.getElementById("portal-account-role");
       var emailEl = document.getElementById("portal-account-email");
-      var tbody = document.getElementById("portal-shipments-body");
+      var listEl = document.getElementById("portal-shipments-list");
       var emptyEl = document.getElementById("portal-shipments-empty");
+      var statLoads = document.getElementById("portal-stat-loads");
+      var statMiles = document.getElementById("portal-stat-miles");
+      var statSpend = document.getElementById("portal-stat-spend");
       var prof = session.profile || {};
       var displayName = [prof.firstName, prof.lastName].filter(Boolean).join(" ").trim() || session.email;
       if (nameEl) nameEl.textContent = displayName;
@@ -1745,35 +1775,92 @@
         roleEl.classList.toggle("is-carrier", session.role === "CARRIER");
       }
       if (emailEl) emailEl.textContent = session.email;
+
+      function formatMoney(n) {
+        var num = Number(n);
+        if (!isFinite(num) || num <= 0) return "—";
+        return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(num);
+      }
+
+      function formatDate(row) {
+        var raw = row.date || row.createdAt;
+        if (!raw) return "—";
+        var dt = new Date(raw);
+        return dt && !isNaN(dt.getTime())
+          ? dt.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })
+          : String(raw);
+      }
+
+      function routeLabel(row) {
+        if (row.originCity || row.originState || row.destCity || row.destState) {
+          var oCity = row.originCity || "";
+          var oSt = row.originState || "";
+          var dCity = row.destCity || "";
+          var dSt = row.destState || "";
+          var from = [oCity, oSt].filter(Boolean).join(", ") || row.origin || "—";
+          var to = [dCity, dSt].filter(Boolean).join(", ") || row.destination || "—";
+          return { from: from, to: to, states: (oSt || "—") + " → " + (dSt || "—") };
+        }
+        var parts = String(row.origin || "—") + " → " + String(row.destination || "—");
+        return { from: row.origin || "—", to: row.destination || "—", states: parts };
+      }
+
+      function statusClass(status) {
+        var s = String(status || "").toLowerCase();
+        if (s.indexOf("deliver") >= 0) return "is-delivered";
+        if (s.indexOf("transit") >= 0 || s.indexOf("progress") >= 0) return "is-transit";
+        if (s.indexOf("quote") >= 0 || s.indexOf("book") >= 0) return "is-booked";
+        return "is-default";
+      }
+
       var rows = GLPortal.listShipments(session.email);
-      if (tbody) {
-        tbody.innerHTML = "";
+      var totalMiles = 0;
+      var totalSpend = 0;
+
+      rows.forEach(function (r) {
+        var mi = Number(r.miles);
+        if (isFinite(mi) && mi > 0) totalMiles += mi;
+        var co = Number(r.cost);
+        if (isFinite(co) && co > 0) totalSpend += co;
+      });
+
+      if (statLoads) statLoads.textContent = String(rows.length);
+      if (statMiles) statMiles.textContent = totalMiles ? totalMiles.toLocaleString() + " mi" : "—";
+      if (statSpend) statSpend.textContent = totalSpend ? formatMoney(totalSpend) : "—";
+
+      if (listEl) {
+        listEl.innerHTML = "";
         rows.forEach(function (r) {
-          var tr = document.createElement("tr");
-          var dt = r.createdAt ? new Date(r.createdAt) : null;
-          var dateStr = dt && !isNaN(dt.getTime()) ? dt.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }) : "—";
-          var lane = (r.origin || "—") + " → " + (r.destination || "—");
-          var kind = r.role === "CARRIER" ? "Carrier" : "Customer";
-          tr.innerHTML =
-            "<td>" +
-            escapeHtml(r.ref || "—") +
-            "</td><td>" +
-            escapeHtml(dateStr) +
-            "</td><td>" +
-            escapeHtml(lane) +
-            "</td><td>" +
-            escapeHtml(r.equipment || "—") +
-            "</td><td>" +
-            escapeHtml(r.status || "—") +
-            "</td><td>" +
-            escapeHtml(kind) +
-            "</td>";
-          tbody.appendChild(tr);
+          var route = routeLabel(r);
+          var card = document.createElement("article");
+          card.className = "portal-shipment-card";
+          var commodity = r.commodity || r.equipment || r.note || "—";
+          var milesStr = r.miles && isFinite(Number(r.miles)) ? Number(r.miles).toLocaleString() + " mi" : "—";
+          var costStr = r.cost != null ? formatMoney(r.cost) : "—";
+          card.innerHTML =
+            '<header class="portal-shipment-card__head">' +
+            '<div><p class="portal-shipment-card__ref">' + escapeHtml(r.ref || "—") + '</p>' +
+            '<p class="portal-shipment-card__date">' + escapeHtml(formatDate(r)) + '</p></div>' +
+            '<span class="portal-shipment-card__status ' + statusClass(r.status) + '">' + escapeHtml(r.status || "—") + '</span>' +
+            '</header>' +
+            '<div class="portal-shipment-card__route">' +
+            '<div class="portal-shipment-card__city"><span class="portal-shipment-card__label">From</span><strong>' + escapeHtml(route.from) + '</strong><span class="portal-shipment-card__state">' + escapeHtml(row.originState || "") + '</span></div>' +
+            '<div class="portal-shipment-card__arrow" aria-hidden="true">→</div>' +
+            '<div class="portal-shipment-card__city"><span class="portal-shipment-card__label">To</span><strong>' + escapeHtml(route.to) + '</strong><span class="portal-shipment-card__state">' + escapeHtml(row.destState || "") + '</span></div>' +
+            '</div>' +
+            '<dl class="portal-shipment-card__meta">' +
+            '<div><dt>States</dt><dd>' + escapeHtml(route.states) + '</dd></div>' +
+            '<div><dt>Miles</dt><dd>' + escapeHtml(milesStr) + '</dd></div>' +
+            '<div><dt>Commodity</dt><dd>' + escapeHtml(commodity) + '</dd></div>' +
+            '<div><dt>Cost</dt><dd class="portal-shipment-card__cost">' + escapeHtml(costStr) + '</dd></div>' +
+            '</dl>';
+          listEl.appendChild(card);
         });
       }
+
       if (emptyEl) emptyEl.hidden = rows.length > 0;
-      var tbl = document.querySelector(".portal-table-wrap .portal-table");
-      if (tbl) tbl.style.display = rows.length ? "" : "none";
+      if (listEl) listEl.hidden = rows.length === 0;
+
       var out = document.getElementById("portal-logout");
       if (out) {
         out.addEventListener("click", function (e) {
