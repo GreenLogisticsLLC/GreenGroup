@@ -1,0 +1,2 @@
+Green Logistics deploy marker. If this file is visible at /deploy-check.txt, .cpanel.yml copied files to the correct document root.
+Last updated: 2026-07-06
