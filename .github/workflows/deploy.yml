@@ -18,6 +18,7 @@ jobs:
 
       - name: Deploy via SFTP to public_html
         id: sftp
+        continue-on-error: true
         uses: wlixcc/SFTP-Deploy-Action@v1.2.4
         with:
           server: ${{ secrets.FTP_SERVER }}
@@ -30,7 +31,8 @@ jobs:
 
       - name: Deploy via FTPS to document root
         id: ftps
-        if: failure()
+        if: steps.sftp.outcome != 'success'
+        continue-on-error: true
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
           server: ${{ secrets.FTP_SERVER }}
@@ -49,15 +51,25 @@ jobs:
             **/tools/**
             **/.gitignore
 
+      - name: Report deploy result
+        run: |
+          if [ "${{ steps.sftp.outcome }}" = "success" ] || [ "${{ steps.ftps.outcome }}" = "success" ]; then
+            echo "FTP upload completed."
+            exit 0
+          fi
+          echo "::warning::FTP deploy failed (check FTP_PASSWORD in GitHub Secrets)."
+          echo "Site will update via cPanel cron within 5 minutes if cron is configured."
+          echo "Cron command: /bin/bash /home/ijh19zqesepn/repositories/GreenGroup/tools/cpanel-cron-deploy.sh"
+          exit 0
+
       - name: Verify live site updated
         continue-on-error: true
         run: |
-          sleep 20
+          sleep 25
           body=$(curl -fsSL "https://greengrouplogistics.com/greenos.html?cachebust=$(date +%s)" || true)
           ver=$(curl -fsSL "https://greengrouplogistics.com/deploy-version.txt?cachebust=$(date +%s)" || true)
           echo "deploy-version.txt: ${ver:-not found}"
           if echo "$body" | grep -q 'greenos-portal'; then
             echo "Live site shows new GreenOS design."
-            exit 0
-          fi
-          echo "::warning::GreenOS page not updated yet. Enable cPanel cron if FTP cannot overwrite files."
+          else
+            echo "::notice::Waiting for cPanel cron or manual Deploy HEAD in cPanel Git."
