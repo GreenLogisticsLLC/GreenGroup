@@ -13,8 +13,29 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Deploy via FTPS to public_html
-        id: ftps
+      - name: Deploy to document root (./)
+        id: root
+        continue-on-error: true
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          security: loose
+          server-dir: ./
+          local-dir: ./
+          log-level: verbose
+          exclude: |
+            **/.git/**
+            **/.github/**
+            **/tools/**
+            **/.gitignore
+
+      - name: Deploy to public_html/
+        id: publichtml
+        if: steps.root.outcome == 'failure'
         continue-on-error: true
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
@@ -26,32 +47,23 @@ jobs:
           security: loose
           server-dir: public_html/
           local-dir: ./
-          log-level: minimal
+          log-level: verbose
           exclude: |
             **/.git/**
             **/.github/**
             **/tools/**
             **/.gitignore
 
-      - name: Deploy via SFTP (port 22)
-        id: sftp
-        if: steps.ftps.outcome == 'failure'
-        continue-on-error: true
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          port: 22
-          local_path: ./*
-          remote_path: /home/ijh19zqesepn/public_html/
-          sftp_only: true
-
-      - name: Deploy status
+      - name: Verify live site updated
         run: |
-          if [ "${{ steps.ftps.outcome }}" = "success" ] || [ "${{ steps.sftp.outcome }}" = "success" ]; then
-            echo "Site updated via FTP/SFTP."
+          sleep 15
+          body=$(curl -fsSL "https://greengrouplogistics.com/greenos.html?cachebust=$(date +%s)" || true)
+          if echo "$body" | grep -q 'greenos-portal'; then
+            echo "Live site shows new GreenOS design."
             exit 0
           fi
-          echo "::notice::FTP deploy skipped or failed. cPanel cron will sync from GitHub within 5 minutes."
-          echo "Ensure Cron Jobs runs: /bin/bash /home/ijh19zqesepn/repositories/GreenGroup/tools/cpanel-cron-deploy.sh"
+          echo "::warning::greenos.html on live site may still be cached or FTP path needs checking."
+          if [ "${{ steps.root.outcome }}" != "success" ] && [ "${{ steps.publichtml.outcome }}" != "success" ]; then
+            echo "::error::FTP deploy failed."
+            exit 1
+          fi
