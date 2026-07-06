@@ -1,5 +1,10 @@
 ---
+# Copies site files from the cPanel git checkout into public_html.
+# After push to GitHub, cPanel must pull + run this file (webhook or manual Deploy).
 deployment:
   tasks:
     - export DEPLOYPATH=/home/jh1gzqesepn/public_html/
-    - /bin/cp -R * $DEPLOYPATH
+    - /bin/cp -a assets $DEPLOYPATH
+    - /bin/cp -a blog $DEPLOYPATH
+    - /bin/cp -a *.html $DEPLOYPATH
+    - /bin/cp -a robots.txt sitemap.xml $DEPLOYPATH

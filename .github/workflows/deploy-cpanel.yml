@@ -1,0 +1,23 @@
+name: Deploy to cPanel
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger cPanel pull and deploy
+        env:
+          CPANEL_DEPLOY_WEBHOOK_URL: ${{ secrets.CPANEL_DEPLOY_WEBHOOK_URL }}
+        run: |
+          if [ -z "$CPANEL_DEPLOY_WEBHOOK_URL" ]; then
+            echo "CPANEL_DEPLOY_WEBHOOK_URL is not set in GitHub repository secrets."
+            echo "Add the Deployment URL from cPanel (Git Version Control -> Manage -> Pull or Deploy)."
+            exit 0
+          fi
+          curl -fsS -X POST "$CPANEL_DEPLOY_WEBHOOK_URL" \
+            -H "Content-Type: application/json" \
+            -d '{"ref":"refs/heads/main"}'
