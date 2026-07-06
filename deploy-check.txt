@@ -1,2 +1,2 @@
-Green Logistics deploy marker. If this file is visible at /deploy-check.txt, .cpanel.yml copied files to the correct document root.
-Last updated: 2026-07-06
+Green Logistics auto-deploy marker.
+If you see this file on the live site, deployment reached public_html successfully.
