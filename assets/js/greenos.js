@@ -39,12 +39,13 @@
         return null;
       }
     },
-    login: function (email, password) {
+    login: function (email, password, role) {
       var user = findUser(email, password);
       if (!user) return null;
       var session = {
         email: normEmail(user.email),
         name: String(user.name || user.email || "").trim() || normEmail(user.email),
+        role: String(role || user.role || "").trim().toLowerCase(),
         loggedInAt: new Date().toISOString()
       };
       localStorage.setItem(SESS_KEY, JSON.stringify(session));
@@ -104,7 +105,15 @@
         err.textContent = "";
       }
       var fd = new FormData(form);
-      var sess = GLGreenOS.login(fd.get("email"), fd.get("password"));
+      var role = fd.get("role");
+      if (!role) {
+        if (err) {
+          err.hidden = false;
+          err.textContent = "Please select your position (Owner, Accounting, Broker, or Manager).";
+        }
+        return;
+      }
+      var sess = GLGreenOS.login(fd.get("email"), fd.get("password"), role);
       if (sess) {
         var appUrl = GLGreenOS.getAppUrl();
         window.location.href = appUrl || prefix + "greenos-dashboard.html";
@@ -134,6 +143,17 @@
 
     var nameEl = document.getElementById("greenos-user-name");
     if (nameEl) nameEl.textContent = session.name || session.email;
+
+    var roleEl = document.getElementById("greenos-user-role");
+    if (roleEl && session.role) {
+      var roleLabels = {
+        owner: "Owner",
+        accounting: "Accounting",
+        broker: "Broker",
+        manager: "Manager"
+      };
+      roleEl.textContent = roleLabels[session.role] || session.role;
+    }
 
     var logout = document.getElementById("greenos-logout");
     if (logout) {
