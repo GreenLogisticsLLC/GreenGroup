@@ -1,18 +1,34 @@
 #!/bin/bash
-# Run from cPanel -> Cron Jobs every 5 minutes for near-instant site updates after git push.
-# Command: /bin/bash /home/ijh19zqesepn/repositories/GreenGroup/tools/cpanel-cron-deploy.sh
-set -e
+# cPanel Cron (every 5 min):
+# /bin/bash /home/ijh19zqesepn/repositories/GreenGroup/tools/cpanel-cron-deploy.sh
 REPO="/home/ijh19zqesepn/repositories/GreenGroup"
 PUBLIC="/home/ijh19zqesepn/public_html"
-cd "$REPO"
-git fetch origin main
-git reset --hard origin/main
-if [ -x /usr/local/cpanel/bin/git_deploy ]; then
-  /usr/local/cpanel/bin/git_deploy "$REPO"
-else
-  /bin/cp -R "$REPO/assets" "$PUBLIC/"
-  /bin/cp -R "$REPO/blog" "$PUBLIC/"
-  /bin/cp "$REPO"/*.html "$PUBLIC/" 2>/dev/null || true
-  /bin/cp "$REPO/robots.txt" "$REPO/sitemap.xml" "$REPO/deploy-check.txt" "$REPO/deploy-version.txt" "$PUBLIC/" 2>/dev/null || true
+LOG="$PUBLIC/deploy-cron.log"
+
+log() { echo "[$(date)] $*" >> "$LOG"; }
+
+if [ ! -d "$REPO/.git" ]; then
+  log "ERROR: repo not found at $REPO — clone GreenGroup in cPanel Git first."
+  exit 1
 fi
-echo "Deployed $(git rev-parse --short HEAD) at $(date)" >> "$PUBLIC/deploy-check.txt"
+
+cd "$REPO" || { log "ERROR: cannot cd to $REPO"; exit 1; }
+
+GIT="$(command -v git || echo /usr/local/cpanel/3rdparty/bin/git)"
+$GIT fetch origin main 2>>"$LOG" || { log "ERROR: git fetch failed"; exit 1; }
+$GIT reset --hard origin/main 2>>"$LOG" || { log "ERROR: git reset failed"; exit 1; }
+
+HEAD="$($GIT rev-parse --short HEAD 2>/dev/null || echo unknown)"
+log "Synced to $HEAD"
+
+if [ -x /usr/local/cpanel/bin/git_deploy ]; then
+  /usr/local/cpanel/bin/git_deploy "$REPO" >>"$LOG" 2>&1 || log "WARN: git_deploy failed, using cp fallback"
+fi
+
+/bin/cp -R "$REPO/assets" "$PUBLIC/" 2>>"$LOG"
+/bin/cp -R "$REPO/blog" "$PUBLIC/" 2>>"$LOG"
+/bin/cp "$REPO"/*.html "$PUBLIC/" 2>>"$LOG"
+/bin/cp "$REPO/robots.txt" "$REPO/sitemap.xml" "$REPO/deploy-check.txt" "$REPO/deploy-version.txt" "$PUBLIC/" 2>>"$LOG"
+
+echo "Deployed $HEAD at $(date)" >> "$PUBLIC/deploy-check.txt"
+log "Deploy complete: $HEAD"
