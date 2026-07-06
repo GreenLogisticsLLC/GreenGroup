@@ -7,6 +7,6 @@
  * Successful logins will redirect there instead of the on-site dashboard.
  */
 window.GL_GREENOS_CONFIG = {
-  appUrl: "",
+  appUrl: "https://os.greengrouplogistics.com/greenos-dashboard.html",
   users: []
 };

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GreenOS | Green Logistics Internal System</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="GreenOS — secure employee sign-in for Green Logistics internal tools, CRM, and operations.">
+  <meta name="greenos-build" content="2026-07-06-os1">
+  <link rel="icon" type="image/png" href="assets/from-site/Logo.png">
+  <link rel="canonical" href="https://os.greengrouplogistics.com/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css?v=12">
+</head>
+<body class="greenos-portal" data-greenos-page="login">
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="greenos-portal-header">
+    <a href="https://greengrouplogistics.com/" class="greenos-portal-brand" aria-label="Green Logistics home">
+      <img src="assets/from-site/Logo.png" width="160" height="44" alt="Green Logistics">
+    </a>
+    <a href="https://greengrouplogistics.com/" class="greenos-portal-back">← Back to website</a>
+  </header>
+
+  <main id="main" class="greenos-portal-main">
+    <div class="greenos-portal-shell">
+      <section class="greenos-portal-intro" aria-labelledby="greenos-title">
+        <p class="greenos-portal-eyebrow">Internal system</p>
+        <h1 id="greenos-title" class="greenos-portal-title">Green<span>OS</span></h1>
+        <p class="greenos-portal-tagline">One secure workspace for CRM, operations, time tracking, and company tools — built for Green Logistics teams.</p>
+        <ul class="greenos-portal-highlights">
+          <li>Role-based employee access</li>
+          <li>Brokerage &amp; back-office tools</li>
+          <li>Protected internal environment</li>
+        </ul>
+      </section>
+
+      <section class="greenos-portal-panel" aria-labelledby="greenos-signin-title">
+        <div class="greenos-portal-panel-inner">
+          <h2 id="greenos-signin-title" class="greenos-portal-panel-title">Employee sign in</h2>
+          <p class="greenos-portal-panel-note">Select your role, then enter your work credentials. Customer and carrier accounts use the <a href="https://greengrouplogistics.com/login.html">public portal</a>.</p>
+
+          <p id="greenos-setup-notice" class="greenos-notice" hidden role="status">GreenOS credentials are being configured. Your administrator will enable access soon.</p>
+          <p id="greenos-login-error" class="greenos-error" hidden role="alert"></p>
+
+          <form id="greenos-login-form" class="greenos-portal-form" method="post" action="#" novalidate>
+            <fieldset class="greenos-role-fieldset">
+              <legend class="greenos-role-legend">Your position</legend>
+              <div class="greenos-role-grid">
+                <label class="greenos-role-card">
+                  <input type="radio" name="role" value="owner" required>
+                  <span class="greenos-role-card-inner">
+                    <span class="greenos-role-icon" aria-hidden="true">◆</span>
+                    <span class="greenos-role-name">Owner</span>
+                    <span class="greenos-role-desc">Company leadership</span>
+                  </span>
+                </label>
+                <label class="greenos-role-card">
+                  <input type="radio" name="role" value="accounting">
+                  <span class="greenos-role-card-inner">
+                    <span class="greenos-role-icon" aria-hidden="true">$</span>
+                    <span class="greenos-role-name">Accounting</span>
+                    <span class="greenos-role-desc">Finance &amp; billing</span>
+                  </span>
+                </label>
+                <label class="greenos-role-card">
+                  <input type="radio" name="role" value="broker">
+                  <span class="greenos-role-card-inner">
+                    <span class="greenos-role-icon" aria-hidden="true">↗</span>
+                    <span class="greenos-role-name">Broker</span>
+                    <span class="greenos-role-desc">Freight brokerage</span>
+                  </span>
+                </label>
+                <label class="greenos-role-card">
+                  <input type="radio" name="role" value="manager">
+                  <span class="greenos-role-card-inner">
+                    <span class="greenos-role-icon" aria-hidden="true">☰</span>
+                    <span class="greenos-role-name">Manager</span>
+                    <span class="greenos-role-desc">Team &amp; operations</span>
+                  </span>
+                </label>
+              </div>
+            </fieldset>
+
+            <label class="greenos-field">
+              <span>Work email</span>
+              <input type="email" name="email" autocomplete="username" required placeholder="you@greengrouplogistics.com">
+            </label>
+            <label class="greenos-field">
+              <span>Password</span>
+              <input type="password" name="password" autocomplete="current-password" required placeholder="Enter your password">
+            </label>
+
+            <button type="submit" class="greenos-submit-btn">Sign in to GreenOS</button>
+          </form>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="greenos-portal-footer">
+    <p class="greenos-portal-footer-text">
+      <strong>GreenOS</strong> is an internal program of Green Logistics LLC.
+      Authorized employees only. Unauthorized access is prohibited.
+    </p>
+    <p class="greenos-portal-footer-meta">© <span data-year></span> Green Logistics LLC · <span>os.greengrouplogistics.com</span></p>
+  </footer>
+
+  <script src="assets/js/greenos-config.js" defer></script>
+  <script src="assets/js/greenos.js" defer></script>
+  <script src="assets/js/main.js" defer></script>
+</body>
+</html>
