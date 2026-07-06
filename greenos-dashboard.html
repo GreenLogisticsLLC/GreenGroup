@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GreenOS Dashboard | Green Logistics</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" href="assets/from-site/Logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <link rel="stylesheet" href="assets/css/demo.css">
+</head>
+<body data-greenos-page="dashboard">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header" data-header>
+    <div class="container header-inner">
+      <div class="logo logo--header-brand">
+        <a class="logo__home" href="index.html" aria-label="Green Logistics home">
+          <img class="logo-img logo-img--header" src="assets/from-site/Logo.png" width="220" height="60" alt="Green Logistics">
+        </a>
+      </div>
+      <button type="button" class="nav-toggle" aria-expanded="false" aria-controls="site-nav" data-nav-toggle>
+        <span class="nav-toggle-bar"></span>
+        <span class="sr-only">Menu</span>
+      </button>
+      <nav id="site-nav" class="site-nav" data-nav>
+        <ul class="nav-list">
+          <li><a href="index.html">Home</a></li>
+          <li class="nav-item has-dropdown">
+            <button class="nav-link-btn" type="button" data-dropdown-toggle aria-expanded="false">Company</button>
+            <div class="dropdown-menu">
+              <a href="about.html">About us</a>
+              <a href="contact.html">Contact</a>
+              <a href="greenos.html" aria-current="page">GreenOS</a>
+              <a href="https://g.page/r/CYnYasDBg-hSEAE" target="_blank" rel="noopener noreferrer">Google Business</a>
+            </div>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="page-hero page-hero--greenos">
+      <div class="container greenos-dash-head">
+        <div>
+          <p class="eyebrow">GreenOS</p>
+          <h1>Welcome, <span id="greenos-user-name">Employee</span></h1>
+          <p class="lead narrow">Your internal workspace. Apps will appear here as they are connected to the Green Logistics subdomain.</p>
+        </div>
+        <a href="#" id="greenos-logout" class="btn btn-ghost">Sign out</a>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <p class="greenos-dash-intro">Modules below are placeholders until your internal programs are deployed.</p>
+        <div class="greenos-app-grid">
+          <article class="greenos-app-card is-soon">
+            <h2>CRM</h2>
+            <p>Brokerage customer and load management.</p>
+            <span class="greenos-app-badge">Coming soon</span>
+          </article>
+          <article class="greenos-app-card is-soon">
+            <h2>Time &amp; attendance</h2>
+            <p>Clock in and clock out for all employees.</p>
+            <span class="greenos-app-badge">Coming soon</span>
+          </article>
+          <article class="greenos-app-card is-soon">
+            <h2>Internal programs</h2>
+            <p>Custom Green Logistics tools and workflows.</p>
+            <span class="greenos-app-badge">Coming soon</span>
+          </article>
+          <article class="greenos-app-card is-soon">
+            <h2>Operations hub</h2>
+            <p>Full internal system on your dedicated subdomain.</p>
+            <span class="greenos-app-badge">Coming soon</span>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-bottom">
+      <p class="footer-copy">© <span data-year></span> Green Logistics · GreenOS internal</p>
+    </div>
+  </footer>
+
+  <script src="assets/js/greenos-config.js" defer></script>
+  <script src="assets/js/greenos.js" defer></script>
+  <script src="assets/js/main.js" defer></script>
+</body>
+</html>
