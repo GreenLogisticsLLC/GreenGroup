@@ -91,8 +91,9 @@ function navUl(p) {
             </div>
           </li>
           <li class="nav-item has-dropdown">
-            <button class="nav-link-btn" type="button" data-dropdown-toggle aria-expanded="false">Terms and Conditions</button>
+            <button class="nav-link-btn" type="button" data-dropdown-toggle aria-expanded="false" aria-label="Terms and Conditions">Terms</button>
             <div class="dropdown-menu">
+              <p class="dropdown-menu__title">Terms and Conditions</p>
               <a href="${h("terms.html")}">Full terms</a>
               <a href="${h("terms.html#agreement-to-terms")}">Agreement to terms</a>
               <a href="${h("terms.html#payment-terms")}">Payment terms</a>
