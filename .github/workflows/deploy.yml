@@ -1,5 +1,11 @@
 name: Deploy to live site
 
+# Deployment is handled on the server by cPanel Git Version Control + Cron:
+#   /bin/bash /home/ijh19zqesepn/repositories/GreenGroup/tools/cpanel-cron-deploy.sh
+# The cron runs `git reset --hard origin/main` and copies files into public_html,
+# so this workflow does NOT push files itself (no FTP/SFTP, no secrets required).
+# It only records the pushed commit and verifies the live site picked it up.
+
 on:
   push:
     branches:
@@ -7,95 +13,33 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy:
+  verify:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Write deploy marker
-        run: echo "${{ github.sha }}" > deploy-version.txt
-
-      - name: Prepare GreenOS subdomain bundle
+      - name: Show pushed commit
         run: |
-          rm -rf .deploy-os
-          mkdir -p .deploy-os/assets/js
-          cp -R assets .deploy-os/
-          cp os-site/index.html .deploy-os/index.html
-          cp os-site/index.html .deploy-os/greenos.html
-          cp os-site/greenos-dashboard.html .deploy-os/
-          cp os-site/robots.txt .deploy-os/
-          cp os-site/assets/js/greenos-config.js .deploy-os/assets/js/greenos-config.js
-          echo "${{ github.sha }}" > .deploy-os/deploy-version.txt
+          echo "Pushed commit: ${{ github.sha }}"
+          echo "cPanel cron will sync origin/main and deploy within its schedule."
+          echo "Manual run: /bin/bash /home/ijh19zqesepn/repositories/GreenGroup/tools/cpanel-cron-deploy.sh"
 
-      - name: Deploy main site via SFTP
-        id: sftp_main
-        continue-on-error: true
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          port: 22
-          local_path: ./*
-          remote_path: /home/ijh19zqesepn/public_html/
-          sftp_only: true
-
-      - name: Deploy GreenOS subdomain via SFTP
-        id: sftp_os
-        continue-on-error: true
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          port: 22
-          local_path: ./.deploy-os/*
-          remote_path: /home/ijh19zqesepn/os.greengrouplogistics.com/
-          sftp_only: true
-
-      - name: Deploy via FTPS fallback
-        id: ftps
-        if: steps.sftp_main.outcome != 'success' && steps.sftp_os.outcome != 'success'
-        continue-on-error: true
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftps
-          port: 21
-          security: loose
-          server-dir: ./
-          local-dir: ./
-          state-name: greengroup-root
-          log-level: verbose
-          exclude: |
-            **/.git/**
-            **/.github/**
-            **/tools/**
-            **/.gitignore
-
-      - name: Report deploy result
-        run: |
-          if [ "${{ steps.sftp_main.outcome }}" = "success" ] || [ "${{ steps.sftp_os.outcome }}" = "success" ] || [ "${{ steps.ftps.outcome }}" = "success" ]; then
-            echo "FTP upload completed."
-            exit 0
-          fi
-          echo "::warning::FTP deploy failed (check FTP_PASSWORD in GitHub Secrets)."
-          echo "Sites will update via cPanel cron within 5 minutes if cron is configured."
-          echo "Cron: /bin/bash /home/ijh19zqesepn/repositories/GreenGroup/tools/cpanel-cron-deploy.sh"
-          exit 0
-
-      - name: Verify deployments
+      - name: Verify live site picked up the commit (via cPanel cron)
         continue-on-error: true
         run: |
-          sleep 25
-          main=$(curl -fsSL "https://greengrouplogistics.com/deploy-version.txt?cachebust=$(date +%s)" || true)
-          os=$(curl -kfsSL "https://os.greengrouplogistics.com/?cachebust=$(date +%s)" || true)
-          echo "Main deploy-version: ${main:-not found}"
-          if echo "$os" | grep -q 'greenos-portal'; then
-            echo "GreenOS subdomain is live."
-          else
-            echo "::notice::GreenOS subdomain may need SSL or cron deploy."
+          short="$(echo "${{ github.sha }}" | cut -c1-7)"
+          echo "Looking for commit $short on the live site (waiting for cron)..."
+          found=""
+          for i in $(seq 1 10); do
+            sleep 30
+            check="$(curl -fsSL "https://greengrouplogistics.com/deploy-check.txt?cachebust=$(date +%s)" || true)"
+            version="$(curl -fsSL "https://greengrouplogistics.com/deploy-version.txt?cachebust=$(date +%s)" || true)"
+            if echo "$check" | grep -q "$short" || echo "$version" | grep -q "$short"; then
+              found="yes"
+              echo "Live site is on commit $short."
+              break
+            fi
+            echo "Attempt $i/10: not deployed yet."
+          done
+          if [ -z "$found" ]; then
+            echo "::notice::Live site has not synced commit $short yet."
+            echo "::notice::Check cPanel: Git Version Control repo exists at /home/ijh19zqesepn/repositories/GreenGroup and the cron job is enabled."
           fi
