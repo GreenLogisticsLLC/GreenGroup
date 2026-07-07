@@ -81,6 +81,16 @@
         writeJson(SESS, sess);
         return sess;
       },
+      setPassword: function (email, newPassword) {
+        email = normEmail(email);
+        if (!email || String(newPassword || "").length < 8) return false;
+        var m = accountMap();
+        if (!m[email]) return false;
+        m[email].password = String(newPassword);
+        m[email].passwordUpdatedAt = new Date().toISOString();
+        writeJson(ACC, m);
+        return true;
+      },
       logout: function () {
         localStorage.removeItem(SESS);
       },
@@ -1322,6 +1332,7 @@
         "</strong>.</p>" +
         '<p class="register-modal__status" data-register-status="customer" hidden></p>' +
         '<button type="submit" class="register-modal__submit">Confirm</button>' +
+        '<p class="register-modal__mailnote" style="text-align:center;margin-top:.6rem;">Already registered? <button type="button" class="register-modal__back" style="display:inline;padding:0;font-weight:600;" data-forgot-password>Forgot password?</button></p>' +
         "</form></div>" +
         '<div class="register-modal__step" data-register-step="carrier" hidden>' +
         '<button type="button" class="register-modal__back" data-register-go="pick">&larr; Back</button>' +
@@ -1341,6 +1352,7 @@
         "</strong>.</p>" +
         '<p class="register-modal__status" data-register-status="carrier" hidden></p>' +
         '<button type="submit" class="register-modal__submit">Confirm</button>' +
+        '<p class="register-modal__mailnote" style="text-align:center;margin-top:.6rem;">Already registered? <button type="button" class="register-modal__back" style="display:inline;padding:0;font-weight:600;" data-forgot-password>Forgot password?</button></p>' +
         "</form></div></div>";
       document.body.appendChild(registerDialog);
     }
@@ -1720,6 +1732,179 @@
     });
   }
   portalUpdateAuthLinks();
+
+  (function initForgotPassword() {
+    var triggers = document.querySelectorAll("[data-forgot-password]");
+    if (!triggers.length) return;
+
+    var RESET_EMAIL = "info@greengrouplogistics.com";
+    var RESET_ENDPOINT = "https://formsubmit.co/ajax/" + RESET_EMAIL;
+
+    var dialog = document.getElementById("forgot-password-modal");
+    if (!dialog) {
+      dialog = document.createElement("dialog");
+      dialog.id = "forgot-password-modal";
+      dialog.className = "register-modal";
+      dialog.setAttribute("aria-labelledby", "forgot-password-title");
+      dialog.innerHTML =
+        '<div class="register-modal__panel">' +
+        '<button type="button" class="register-modal__close" data-forgot-close aria-label="Close">&times;</button>' +
+        '<h2 class="register-modal__title" id="forgot-password-title">Reset your password</h2>' +
+        '<div class="register-modal__step" data-forgot-step="email">' +
+        '<p class="register-modal__hint">Enter the email you used to register. If your account is on this device, you can set a new password right away. We also notify our team so we can help if needed.</p>' +
+        '<form class="register-modal__form" id="forgot-form-email">' +
+        '<label class="register-modal__hp" aria-hidden="true">Leave empty<input name="_honey" type="text" tabindex="-1" autocomplete="off"></label>' +
+        '<label class="register-modal__field"><span class="register-modal__label">Email</span><input name="email" type="email" autocomplete="email" required placeholder="you@company.com"></label>' +
+        '<p class="register-modal__status" data-forgot-status="email" hidden></p>' +
+        '<button type="submit" class="register-modal__submit">Continue</button>' +
+        '</form>' +
+        '</div>' +
+        '<div class="register-modal__step" data-forgot-step="set" hidden>' +
+        '<p class="register-modal__hint">Account found on this device. Set a new password below.</p>' +
+        '<form class="register-modal__form" id="forgot-form-set">' +
+        '<label class="register-modal__field"><span class="register-modal__label">New password</span><input name="newPassword" type="password" autocomplete="new-password" required minlength="8" placeholder="At least 8 characters"></label>' +
+        '<label class="register-modal__field"><span class="register-modal__label">Confirm new password</span><input name="confirmPassword" type="password" autocomplete="new-password" required minlength="8"></label>' +
+        '<p class="register-modal__status" data-forgot-status="set" hidden></p>' +
+        '<button type="submit" class="register-modal__submit">Save new password</button>' +
+        '</form>' +
+        '</div>' +
+        '<div class="register-modal__step" data-forgot-step="done" hidden>' +
+        '<p class="register-modal__hint" data-forgot-done-msg></p>' +
+        '<button type="button" class="register-modal__submit" data-forgot-close>Close</button>' +
+        '</div>' +
+        '</div>';
+      document.body.appendChild(dialog);
+    }
+
+    var pendingEmail = "";
+
+    function showStep(step) {
+      dialog.querySelectorAll("[data-forgot-step]").forEach(function (el) {
+        el.hidden = el.getAttribute("data-forgot-step") !== step;
+      });
+    }
+
+    function setStatus(kind, message, isError) {
+      var el = dialog.querySelector('[data-forgot-status="' + kind + '"]');
+      if (!el) return;
+      if (!message) {
+        el.hidden = true;
+        el.textContent = "";
+        return;
+      }
+      el.hidden = false;
+      el.textContent = message;
+      el.classList.toggle("is-error", !!isError);
+    }
+
+    function openModal() {
+      pendingEmail = "";
+      var fe = document.getElementById("forgot-form-email");
+      var fs = document.getElementById("forgot-form-set");
+      if (fe) fe.reset();
+      if (fs) fs.reset();
+      setStatus("email", "");
+      setStatus("set", "");
+      showStep("email");
+      if (typeof dialog.showModal === "function") dialog.showModal();
+      else dialog.setAttribute("open", "");
+    }
+
+    function closeModal() {
+      if (typeof dialog.close === "function") dialog.close();
+      else dialog.removeAttribute("open");
+    }
+
+    function notifyTeam(email) {
+      try {
+        fetch(RESET_ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify({
+            _subject: "Password reset request - Green Logistics",
+            email: email,
+            message: "This user requested a password reset from the website login page.",
+          }),
+        }).catch(function () {});
+      } catch (_e) {}
+    }
+
+    triggers.forEach(function (btn) {
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        var openDialogs = document.querySelectorAll("dialog[open]");
+        openDialogs.forEach(function (d) {
+          if (d !== dialog && typeof d.close === "function") d.close();
+        });
+        openModal();
+      });
+    });
+
+    dialog.addEventListener("click", function (e) {
+      if (e.target === dialog) closeModal();
+      if (e.target.closest && e.target.closest("[data-forgot-close]")) {
+        e.preventDefault();
+        closeModal();
+      }
+    });
+
+    var formEmail = document.getElementById("forgot-form-email");
+    if (formEmail) {
+      formEmail.addEventListener("submit", function (e) {
+        e.preventDefault();
+        var fd = new FormData(formEmail);
+        if (String(fd.get("_honey") || "")) return;
+        var email = GLPortal.normEmail(fd.get("email"));
+        if (!email) {
+          setStatus("email", "Please enter a valid email.", true);
+          return;
+        }
+        pendingEmail = email;
+        notifyTeam(email);
+        if (GLPortal.getAccount(email)) {
+          setStatus("email", "");
+          showStep("set");
+        } else {
+          var msg = dialog.querySelector("[data-forgot-done-msg]");
+          if (msg)
+            msg.textContent =
+              "We received your request and emailed our team at " +
+              RESET_EMAIL +
+              ". They will contact you to reset your password.";
+          showStep("done");
+        }
+      });
+    }
+
+    var formSet = document.getElementById("forgot-form-set");
+    if (formSet) {
+      formSet.addEventListener("submit", function (e) {
+        e.preventDefault();
+        var fd = new FormData(formSet);
+        var pw = String(fd.get("newPassword") || "");
+        var confirm = String(fd.get("confirmPassword") || "");
+        if (pw.length < 8) {
+          setStatus("set", "Password must be at least 8 characters.", true);
+          return;
+        }
+        if (pw !== confirm) {
+          setStatus("set", "Passwords do not match.", true);
+          return;
+        }
+        if (GLPortal.setPassword(pendingEmail, pw)) {
+          GLPortal.login(pendingEmail, pw);
+          var msg = dialog.querySelector("[data-forgot-done-msg]");
+          if (msg) msg.textContent = "Your password was updated. You are now signed in.";
+          showStep("done");
+          window.setTimeout(function () {
+            window.location.href = portalNavPref() + "account.html";
+          }, 1200);
+        } else {
+          setStatus("set", "Could not update the password. Please contact " + RESET_EMAIL + ".", true);
+        }
+      });
+    }
+  })();
 
   var portalPage = document.body && document.body.getAttribute("data-portal-page");
   if (portalPage === "login") {
