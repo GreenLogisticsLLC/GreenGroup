@@ -28,8 +28,10 @@ fi
 /bin/cp -R "$REPO/assets" "$PUBLIC/" 2>>"$LOG"
 /bin/cp -R "$REPO/blog" "$PUBLIC/" 2>>"$LOG"
 /bin/cp "$REPO"/*.html "$PUBLIC/" 2>>"$LOG"
-/bin/cp "$REPO/robots.txt" "$REPO/sitemap.xml" "$REPO/deploy-check.txt" "$REPO/deploy-version.txt" "$PUBLIC/" 2>>"$LOG"
+/bin/cp "$REPO/robots.txt" "$REPO/sitemap.xml" "$REPO/deploy-check.txt" "$PUBLIC/" 2>>"$LOG"
 
+# Write the real deployed commit so deploy-version.txt reflects what is live.
+echo "$HEAD" > "$PUBLIC/deploy-version.txt"
 echo "Deployed $HEAD at $(date)" >> "$PUBLIC/deploy-check.txt"
 log "Deploy complete: $HEAD"
 
