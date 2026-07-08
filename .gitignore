@@ -4,3 +4,7 @@ assets (2).zip
 tools/upload-pack/
 .DS_Store
 Thumbs.db
+greenos/node_modules/
+greenos/data/
+greenos/.env
+greenos/tmp/

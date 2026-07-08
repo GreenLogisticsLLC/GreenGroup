@@ -1,32 +1,5 @@
----
-# public_html = main site. os.greengrouplogistics.com = GreenOS subdomain.
-deployment:
-  tasks:
-    - export DEPLOYPATH=/home/ijh19zqesepn/public_html/
-    - export REPOPATH=$(pwd)
-    - /bin/cp -R $REPOPATH/assets $DEPLOYPATH
-    - /bin/cp -R $REPOPATH/blog $DEPLOYPATH
-    - /bin/cp $REPOPATH/index.html $DEPLOYPATH
-    - /bin/cp $REPOPATH/about.html $DEPLOYPATH
-    - /bin/cp $REPOPATH/account.html $DEPLOYPATH
-    - /bin/cp $REPOPATH/blog.html $DEPLOYPATH
-    - /bin/cp $REPOPATH/contact.html $DEPLOYPATH
-    - /bin/cp $REPOPATH/density-class-calculator.html $DEPLOYPATH
-    - /bin/cp $REPOPATH/forms-library.html $DEPLOYPATH
-    - /bin/cp $REPOPATH/greenos.html $DEPLOYPATH
-    - /bin/cp $REPOPATH/greenos-dashboard.html $DEPLOYPATH
-    - /bin/cp $REPOPATH/help-center.html $DEPLOYPATH
-    - /bin/cp $REPOPATH/login.html $DEPLOYPATH
-    - /bin/cp $REPOPATH/option.html $DEPLOYPATH
-    - /bin/cp $REPOPATH/service-center-lookup.html $DEPLOYPATH
-    - /bin/cp $REPOPATH/services.html $DEPLOYPATH
-    - /bin/cp $REPOPATH/terms.html $DEPLOYPATH
-    - /bin/cp $REPOPATH/thank-you.html $DEPLOYPATH
-    - /bin/cp $REPOPATH/transit-calculator.html $DEPLOYPATH
-    - /bin/cp $REPOPATH/robots.txt $DEPLOYPATH
-    - /bin/cp $REPOPATH/sitemap.xml $DEPLOYPATH
-    - /bin/cp $REPOPATH/deploy-check.txt $DEPLOYPATH
-    - /bin/cp $REPOPATH/deploy-version.txt $DEPLOYPATH
-    - /bin/sh -c '/bin/date >> '"$DEPLOYPATH"'deploy-check.txt'
-    - /bin/bash $REPOPATH/tools/deploy-os-subdomain.sh $REPOPATH
-
+---
+# cPanel Git → Deploy HEAD Commit (fast static deploy only)
+deployment:
+  tasks:
+    - /bin/bash tools/cpanel-git-deploy-hook.sh

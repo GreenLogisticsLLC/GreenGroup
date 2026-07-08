@@ -1,7 +1,5 @@
-/**
- * GreenOS config for os.greengrouplogistics.com subdomain.
- */
 window.GL_GREENOS_CONFIG = {
-  appUrl: "",
+  apiBaseUrl: "https://os.greengrouplogistics.com/api/v1",
+  appUrl: "https://os.greengrouplogistics.com/",
   users: []
 };

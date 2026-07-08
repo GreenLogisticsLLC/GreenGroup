@@ -12,6 +12,7 @@
   function getConfig() {
     var cfg = window.GL_GREENOS_CONFIG || {};
     return {
+      apiBaseUrl: String(cfg.apiBaseUrl || "").trim().replace(/\/$/, ""),
       appUrl: String(cfg.appUrl || "").trim(),
       users: Array.isArray(cfg.users) ? cfg.users : []
     };
@@ -28,6 +29,71 @@
       }
     }
     return null;
+  }
+
+  function redirectToApp(token) {
+    var cfg = getConfig();
+    var base = cfg.appUrl || "";
+    if (!base) return false;
+    var sep = base.indexOf("?") >= 0 ? "&" : "?";
+    window.location.href = base + (token ? sep + "token=" + encodeURIComponent(token) : "");
+    return true;
+  }
+
+  function loginViaApi(email, password, role, onSuccess, onError) {
+    var cfg = getConfig();
+    if (!cfg.apiBaseUrl) {
+      onError("API not configured");
+      return;
+    }
+    fetch(cfg.apiBaseUrl + "/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username: String(email || "").trim(),
+        password: String(password || "")
+      })
+    })
+      .then(function (res) {
+        return res.json().then(function (data) {
+          return { ok: res.ok, data: data };
+        });
+      })
+      .then(function (result) {
+        if (!result.ok || !result.data || !result.data.success) {
+          onError(
+            (result.data && result.data.message) ||
+              "Invalid email or password. Contact your administrator if you need access."
+          );
+          return;
+        }
+        var token = result.data.data && result.data.data.token;
+        var user = result.data.data && result.data.data.user;
+        var session = {
+          email: normEmail(user && user.username ? user.username : email),
+          name: user
+            ? String(user.firstName || "") + " " + String(user.lastName || "")
+            : normEmail(email),
+          role: String((user && user.role) || role || "").trim(),
+          loggedInAt: new Date().toISOString()
+        };
+        localStorage.setItem(SESS_KEY, JSON.stringify(session));
+        if (token && redirectToApp(token)) {
+          onSuccess(session);
+          return;
+        }
+        if (cfg.appUrl) {
+          window.location.href = cfg.appUrl;
+          onSuccess(session);
+          return;
+        }
+        onError("GreenOS app URL is not configured.");
+      })
+      .catch(function () {
+        onError(
+          "Could not reach GreenOS server. Try again later or contact your administrator."
+        );
+      });
   }
 
   var GLGreenOS = {
@@ -58,7 +124,11 @@
       return getConfig().appUrl;
     },
     hasUsers: function () {
-      return getConfig().users.length > 0;
+      var cfg = getConfig();
+      return cfg.users.length > 0 || !!cfg.apiBaseUrl;
+    },
+    usesApi: function () {
+      return !!getConfig().apiBaseUrl;
     }
   };
 
@@ -79,12 +149,8 @@
   var prefix = navPrefix();
 
   if (page === "login") {
-    if (GLGreenOS.getSession()) {
-      if (GLGreenOS.getAppUrl()) {
-        window.location.replace(GLGreenOS.getAppUrl());
-      } else {
-        window.location.replace(prefix + "greenos-dashboard.html");
-      }
+    if (GLGreenOS.getSession() && GLGreenOS.getAppUrl()) {
+      window.location.replace(GLGreenOS.getAppUrl());
       return;
     }
 
@@ -113,7 +179,43 @@
         }
         return;
       }
-      var sess = GLGreenOS.login(fd.get("email"), fd.get("password"), role);
+
+      var email = fd.get("email");
+      var password = fd.get("password");
+      var submitBtn = form.querySelector(".greenos-submit-btn");
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Signing in…";
+      }
+
+      function resetBtn() {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Sign in to GreenOS";
+        }
+      }
+
+      if (GLGreenOS.usesApi()) {
+        loginViaApi(
+          email,
+          password,
+          role,
+          function () {
+            resetBtn();
+          },
+          function (message) {
+            resetBtn();
+            if (err) {
+              err.hidden = false;
+              err.textContent = message;
+            }
+          }
+        );
+        return;
+      }
+
+      var sess = GLGreenOS.login(email, password, role);
+      resetBtn();
       if (sess) {
         var appUrl = GLGreenOS.getAppUrl();
         window.location.href = appUrl || prefix + "greenos-dashboard.html";
@@ -148,9 +250,12 @@
     if (roleEl && session.role) {
       var roleLabels = {
         owner: "Owner",
+        Owner: "Owner",
         accounting: "Accounting",
         broker: "Broker",
-        manager: "Manager"
+        manager: "Manager",
+        Manager: "Manager",
+        Administrator: "Administrator"
       };
       roleEl.textContent = roleLabels[session.role] || session.role;
     }

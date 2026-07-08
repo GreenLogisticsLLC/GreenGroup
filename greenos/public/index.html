@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Green OS — Green Logistics</title>
+    <link rel="stylesheet" href="/css/greenos.css">
+</head>
+<body>
+    <div id="login-screen" class="screen">
+        <div class="login-card">
+            <div class="logo">Green<span>OS</span></div>
+            <p class="tagline">Internal company platform</p>
+            <form id="login-form">
+                <label>Username or email</label>
+                <input type="text" id="username" autocomplete="username" required>
+                <label>Password</label>
+                <input type="password" id="password" autocomplete="current-password" required>
+                <button type="submit" class="btn-primary">Sign in</button>
+                <p id="login-error" class="error hidden"></p>
+            </form>
+        </div>
+    </div>
+
+    <div id="app-screen" class="screen hidden">
+        <header class="header">
+            <div class="header-left">
+                <div class="logo-small">Green<span>OS</span></div>
+                <p id="header-subtitle">Green Logistics internal system</p>
+            </div>
+            <div class="header-right">
+                <span id="logged-user"></span>
+                <button id="logout-btn" class="btn-secondary">Logout</button>
+            </div>
+        </header>
+
+        <main class="main">
+            <section id="hub-view">
+                <h1>Welcome to Green OS</h1>
+                <p class="hub-desc">Select a module. More modules (CRM, TMS, HR, Dispatch, Accounting) will appear here as they are enabled.</p>
+                <div id="modules-grid" class="modules-grid"></div>
+            </section>
+
+            <section id="module-view" class="hidden">
+                <button id="back-hub" class="btn-secondary btn-sm">← All modules</button>
+                <div id="module-content"></div>
+            </section>
+        </main>
+    </div>
+
+    <script src="/js/greenos-app.js?v=1"></script>
+</body>
+</html>

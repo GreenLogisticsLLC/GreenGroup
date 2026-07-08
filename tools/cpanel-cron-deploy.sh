@@ -22,17 +22,23 @@ HEAD="$($GIT rev-parse --short HEAD 2>/dev/null || echo unknown)"
 log "Synced to $HEAD"
 
 if [ -x /usr/local/cpanel/bin/git_deploy ]; then
-  /usr/local/cpanel/bin/git_deploy "$REPO" >>"$LOG" 2>&1 || log "WARN: git_deploy failed, using cp fallback"
+  timeout 120 /usr/local/cpanel/bin/git_deploy "$REPO" >>"$LOG" 2>&1 || log "WARN: git_deploy failed or timed out, using cp fallback"
 fi
 
+if [ -f "$REPO/tools/cpanel-git-deploy-hook.sh" ]; then
+  /bin/bash "$REPO/tools/cpanel-git-deploy-hook.sh" "$REPO" "$PUBLIC" >>"$LOG" 2>&1 || log "WARN: git deploy hook failed"
+else
 /bin/cp -R "$REPO/assets" "$PUBLIC/" 2>>"$LOG"
 /bin/cp -R "$REPO/blog" "$PUBLIC/" 2>>"$LOG"
 /bin/cp "$REPO"/*.html "$PUBLIC/" 2>>"$LOG"
 /bin/cp "$REPO/robots.txt" "$REPO/sitemap.xml" "$REPO/deploy-check.txt" "$PUBLIC/" 2>>"$LOG"
+fi
 
 # Write the real deployed commit so deploy-version.txt reflects what is live.
 echo "$HEAD" > "$PUBLIC/deploy-version.txt"
 echo "Deployed $HEAD at $(date)" >> "$PUBLIC/deploy-check.txt"
 log "Deploy complete: $HEAD"
 
-/bin/bash "$REPO/tools/deploy-os-subdomain.sh" "$REPO" >>"$LOG" 2>&1 && log "GreenOS subdomain deploy complete: $HEAD" || log "WARN: GreenOS subdomain deploy failed"
+if [ -f "$REPO/greenos/tools/cpanel-deploy-build.sh" ]; then
+  /bin/bash "$REPO/greenos/tools/cpanel-deploy-build.sh" "$REPO/greenos" >>"$LOG" 2>&1 && log "Green OS Node build complete" || log "WARN: Green OS build failed"
+fi
