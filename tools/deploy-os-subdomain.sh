@@ -1,7 +1,13 @@
 #!/bin/bash
-# Deploy GreenOS to os.greengrouplogistics.com document root.
+# Deploy GreenOS static fallback to os.greengrouplogistics.com (legacy os-site).
+# Skip when greenos/ Node app exists — Application Manager serves that path instead.
 REPO="${1:-/home/ijh19zqesepn/repositories/GreenGroup}"
 OS_PUBLIC="${2:-/home/ijh19zqesepn/os.greengrouplogistics.com}"
+
+if [ -d "$REPO/greenos/server.js" ]; then
+  echo "SKIP os-site static deploy: greenos/ Node app is the source for os.greengrouplogistics.com"
+  exit 0
+fi
 
 if [ ! -d "$REPO/os-site" ]; then
   echo "ERROR: $REPO/os-site not found" >&2
