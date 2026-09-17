@@ -32,6 +32,8 @@ else
 /bin/cp -R "$REPO/blog" "$PUBLIC/" 2>>"$LOG"
 /bin/cp "$REPO"/*.html "$PUBLIC/" 2>>"$LOG"
 /bin/cp "$REPO/robots.txt" "$REPO/sitemap.xml" "$REPO/deploy-check.txt" "$PUBLIC/" 2>>"$LOG"
+[ -f "$REPO/.htaccess" ] && /bin/cp "$REPO/.htaccess" "$PUBLIC/.htaccess" 2>>"$LOG"
+[ -d "$REPO/privacy-policy" ] && /bin/cp -R "$REPO/privacy-policy" "$PUBLIC/" 2>>"$LOG"
 fi
 
 # Write the real deployed commit so deploy-version.txt reflects what is live.

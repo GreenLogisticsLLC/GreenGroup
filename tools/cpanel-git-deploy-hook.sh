@@ -14,6 +14,13 @@ HEAD="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
 /bin/cp -R "$REPO/blog" "$PUBLIC/" 2>/dev/null || true
 /bin/cp "$REPO"/*.html "$PUBLIC/" 2>/dev/null || true
 /bin/cp "$REPO/robots.txt" "$REPO/sitemap.xml" "$REPO/deploy-check.txt" "$PUBLIC/" 2>/dev/null || true
+# Legal clean URLs + Apache rewrite rules
+if [ -f "$REPO/.htaccess" ]; then
+  /bin/cp "$REPO/.htaccess" "$PUBLIC/.htaccess" 2>/dev/null || true
+fi
+if [ -d "$REPO/privacy-policy" ]; then
+  /bin/cp -R "$REPO/privacy-policy" "$PUBLIC/" 2>/dev/null || true
+fi
 
 echo "$HEAD" > "$PUBLIC/deploy-version.txt"
 echo "Deployed $HEAD at $(date)" >> "$PUBLIC/deploy-check.txt"
