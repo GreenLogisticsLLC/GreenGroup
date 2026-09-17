@@ -1171,17 +1171,21 @@
     plexusCanvas &&
     !window.matchMedia("(prefers-reduced-motion: reduce)").matches
   ) {
-    var plexusCtx = plexusCanvas.getContext("2d");
+    var plexusCtx = plexusCanvas.getContext("2d", { alpha: true });
     var plexusPoints = [];
-    var plexusN = 56;
-    var plexusMaxDist = 118;
+    var isNarrow = window.matchMedia("(max-width: 768px)").matches;
+    var plexusN = isNarrow ? 22 : 32;
+    var plexusMaxDist = isNarrow ? 90 : 110;
     var plexusRaf = 0;
     var plexusW = 0;
     var plexusH = 0;
+    var plexusVisible = false;
+    var plexusRunning = false;
+    var plexusFrameSkip = 0;
 
     function plexusResize() {
       var rect = plexusRoot.getBoundingClientRect();
-      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      var dpr = Math.min(window.devicePixelRatio || 1, isNarrow ? 1 : 1.5);
       var w = Math.max(1, Math.floor(rect.width));
       var h = Math.max(1, Math.floor(rect.height));
       if (w === plexusW && h === plexusH && plexusPoints.length) return;
@@ -1198,8 +1202,8 @@
         plexusPoints.push({
           x: Math.random() * w,
           y: Math.random() * h,
-          vx: (Math.random() - 0.5) * 0.38,
-          vy: (Math.random() - 0.5) * 0.38,
+          vx: (Math.random() - 0.5) * 0.32,
+          vy: (Math.random() - 0.5) * 0.32,
         });
       }
     }
@@ -1209,7 +1213,8 @@
       var j;
       var dx;
       var dy;
-      var d;
+      var d2;
+      var maxDist2 = plexusMaxDist * plexusMaxDist;
       var a;
       var w = plexusW;
       var h = plexusH;
@@ -1228,9 +1233,9 @@
         for (j = i + 1; j < plexusPoints.length; j++) {
           dx = plexusPoints[i].x - plexusPoints[j].x;
           dy = plexusPoints[i].y - plexusPoints[j].y;
-          d = Math.sqrt(dx * dx + dy * dy);
-          if (d < plexusMaxDist) {
-            a = 0.14 * (1 - d / plexusMaxDist);
+          d2 = dx * dx + dy * dy;
+          if (d2 < maxDist2) {
+            a = 0.14 * (1 - Math.sqrt(d2) / plexusMaxDist);
             plexusCtx.strokeStyle = "rgba(160, 210, 255, " + a.toFixed(3) + ")";
             plexusCtx.lineWidth = 0.6;
             plexusCtx.beginPath();
@@ -1248,8 +1253,29 @@
       }
     }
 
+    function plexusStop() {
+      plexusRunning = false;
+      if (plexusRaf) {
+        window.cancelAnimationFrame(plexusRaf);
+        plexusRaf = 0;
+      }
+    }
+
     function plexusLoop() {
-      plexusStep();
+      if (!plexusVisible || document.hidden) {
+        plexusStop();
+        return;
+      }
+      plexusFrameSkip ^= 1;
+      if (plexusFrameSkip) {
+        plexusStep();
+      }
+      plexusRaf = window.requestAnimationFrame(plexusLoop);
+    }
+
+    function plexusStart() {
+      if (plexusRunning || !plexusVisible || document.hidden) return;
+      plexusRunning = true;
       plexusRaf = window.requestAnimationFrame(plexusLoop);
     }
 
@@ -1257,6 +1283,9 @@
     function plexusOnResize() {
       window.clearTimeout(plexusResizeTimer);
       plexusResizeTimer = window.setTimeout(function () {
+        isNarrow = window.matchMedia("(max-width: 768px)").matches;
+        plexusN = isNarrow ? 22 : 32;
+        plexusMaxDist = isNarrow ? 90 : 110;
         plexusResize();
       }, 120);
     }
@@ -1267,11 +1296,93 @@
         window.requestAnimationFrame(plexusBoot);
         return;
       }
-      plexusRaf = window.requestAnimationFrame(plexusLoop);
+      plexusStart();
     }
 
-    plexusBoot();
+    if ("IntersectionObserver" in window) {
+      var plexusIo = new IntersectionObserver(
+        function (entries) {
+          plexusVisible = entries.some(function (entry) {
+            return entry.isIntersecting;
+          });
+          if (plexusVisible) {
+            plexusBoot();
+          } else {
+            plexusStop();
+          }
+        },
+        { rootMargin: "80px 0px", threshold: 0.05 }
+      );
+      plexusIo.observe(plexusRoot);
+    } else {
+      plexusVisible = true;
+      plexusBoot();
+    }
+
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden) {
+        plexusStop();
+      } else if (plexusVisible) {
+        plexusStart();
+      }
+    });
     window.addEventListener("resize", plexusOnResize, { passive: true });
+  }
+
+  var lazyVideos = document.querySelectorAll("[data-lazy-video]");
+  if (lazyVideos.length) {
+    function loadLazyVideo(video) {
+      if (video.getAttribute("data-lazy-loaded") === "1") return;
+      var sources = video.querySelectorAll("source[data-src]");
+      sources.forEach(function (source) {
+        source.setAttribute("src", source.getAttribute("data-src"));
+        source.removeAttribute("data-src");
+      });
+      video.setAttribute("data-lazy-loaded", "1");
+      video.load();
+    }
+
+    function playLazyVideo(video) {
+      loadLazyVideo(video);
+      var playPromise = video.play();
+      if (playPromise && typeof playPromise.catch === "function") {
+        playPromise.catch(function () {});
+      }
+    }
+
+    if ("IntersectionObserver" in window) {
+      var videoIo = new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (entry) {
+            var video = entry.target;
+            if (entry.isIntersecting) {
+              playLazyVideo(video);
+            } else if (!video.paused) {
+              video.pause();
+            }
+          });
+        },
+        { rootMargin: "200px 0px", threshold: 0.15 }
+      );
+      lazyVideos.forEach(function (video) {
+        videoIo.observe(video);
+      });
+    } else {
+      lazyVideos.forEach(playLazyVideo);
+    }
+
+    document.addEventListener("visibilitychange", function () {
+      lazyVideos.forEach(function (video) {
+        if (document.hidden) {
+          video.pause();
+        } else if (video.getAttribute("data-lazy-loaded") === "1") {
+          var rect = video.getBoundingClientRect();
+          if (rect.bottom > 0 && rect.top < window.innerHeight) {
+            playLazyVideo(video);
+          }
+        }
+      });
+    });
   }
 
   var flagsMarquee = document.querySelector("[data-flags-marquee]");

@@ -1298,6 +1298,8 @@ p {
   padding-bottom: clamp(2.5rem, 5vw, 4rem);
   background: #0a0a0a;
   border-top: 1px solid #2a2a2a;
+  content-visibility: auto;
+  contain-intrinsic-size: 320px;
 }
 
 .stats-section + .trust-banner-section {
@@ -3246,8 +3248,9 @@ p {
     radial-gradient(ellipse 42% 36% at 18% 28%, rgba(80, 160, 255, 0.22), transparent 55%),
     radial-gradient(ellipse 50% 40% at 82% 22%, rgba(100, 200, 255, 0.14), transparent 58%),
     radial-gradient(ellipse 36% 32% at 55% 88%, rgba(61, 154, 92, 0.12), transparent 50%);
-  filter: blur(36px);
+  filter: blur(18px);
   opacity: 0.85;
+  contain: paint;
 }
 
 .hero-plexus-vignette {
@@ -3998,6 +4001,8 @@ p {
 .home-reviews-section {
   background: #0a0a0a;
   border-top: 1px solid #2a2a2a;
+  content-visibility: auto;
+  contain-intrinsic-size: 420px;
 }
 
 .home-reviews-section > .container {
