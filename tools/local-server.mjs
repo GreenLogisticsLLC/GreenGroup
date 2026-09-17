@@ -41,7 +41,23 @@ function safeJoin(root, urlPath) {
 }
 
 const server = http.createServer((req, res) => {
-  const filePath = safeJoin(ROOT, req.url || "/");
+  let urlPath = req.url || "/";
+  // Local clean-URL support matching production redirects
+  if (urlPath === "/privacy-policy" || urlPath === "/privacy-policy/") {
+    res.writeHead(302, { Location: "/privacy-policy.html" });
+    res.end();
+    return;
+  }
+  if (urlPath === "/terms" || urlPath === "/terms/") {
+    res.writeHead(302, { Location: "/terms.html" });
+    res.end();
+    return;
+  }
+  // Directory index for /privacy-policy/
+  if (urlPath.endsWith("/")) {
+    urlPath += "index.html";
+  }
+  const filePath = safeJoin(ROOT, urlPath);
   if (!filePath) {
     res.writeHead(403);
     res.end("Forbidden");

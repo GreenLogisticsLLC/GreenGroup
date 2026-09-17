@@ -3,10 +3,7 @@
   RewriteEngine On
   RewriteBase /
 
-  # Prefer extensionless privacy policy URL
-  RewriteRule ^privacy-policy/?$ privacy-policy.html [L]
-  RewriteRule ^privacy-policy\.html$ - [L]
-
-  # Optional: serve /terms as terms.html if requested without .html
-  RewriteRule ^terms/?$ terms.html [L]
+  # Redirect extensionless URLs to real files so relative CSS/JS/images resolve correctly
+  RewriteRule ^privacy-policy/?$ /privacy-policy.html [R=301,L]
+  RewriteRule ^terms/?$ /terms.html [R=301,L]
 </IfModule>
