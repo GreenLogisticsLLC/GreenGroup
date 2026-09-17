@@ -55,4 +55,19 @@
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
   </url>
+  <url>
+    <loc>https://greengrouplogistics.com/terms.html</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://greengrouplogistics.com/privacy-policy</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.55</priority>
+  </url>
+  <url>
+    <loc>https://greengrouplogistics.com/privacy-policy.html</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.55</priority>
+  </url>
 </urlset>

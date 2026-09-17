@@ -1,0 +1,12 @@
+# Clean URLs for legal pages on greengrouplogistics.com (Apache / cPanel)
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Prefer extensionless privacy policy URL
+  RewriteRule ^privacy-policy/?$ privacy-policy.html [L]
+  RewriteRule ^privacy-policy\.html$ - [L]
+
+  # Optional: serve /terms as terms.html if requested without .html
+  RewriteRule ^terms/?$ terms.html [L]
+</IfModule>

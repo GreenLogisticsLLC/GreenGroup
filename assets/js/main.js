@@ -1440,7 +1440,7 @@
         '<label class="register-modal__field"><span class="register-modal__label">Phone number</span><input name="phone" type="tel" autocomplete="tel" required></label>' +
         '<p class="register-modal__mailnote">After confirm, your registration is sent directly to <strong>' +
         REG_EMAIL +
-        "</strong>.</p>" +
+        "</strong>. By confirming, you agree to our <a href=\"privacy-policy.html\" target=\"_blank\" rel=\"noopener noreferrer\">Privacy Policy</a>.</p>" +
         '<p class="register-modal__status" data-register-status="customer" hidden></p>' +
         '<button type="submit" class="register-modal__submit">Confirm</button>' +
         '<p class="register-modal__mailnote" style="text-align:center;margin-top:.6rem;">Already registered? <button type="button" class="register-modal__back" style="display:inline;padding:0;font-weight:600;" data-forgot-password>Forgot password?</button></p>' +
@@ -1460,7 +1460,7 @@
         '<label class="register-modal__field"><span class="register-modal__label">How many trucks do you have?</span><input name="trucks" type="text" required></label>' +
         '<p class="register-modal__mailnote">After confirm, your registration is sent directly to <strong>' +
         REG_EMAIL +
-        "</strong>.</p>" +
+        "</strong>. By confirming, you agree to our <a href=\"privacy-policy.html\" target=\"_blank\" rel=\"noopener noreferrer\">Privacy Policy</a>.</p>" +
         '<p class="register-modal__status" data-register-status="carrier" hidden></p>' +
         '<button type="submit" class="register-modal__submit">Confirm</button>' +
         '<p class="register-modal__mailnote" style="text-align:center;margin-top:.6rem;">Already registered? <button type="button" class="register-modal__back" style="display:inline;padding:0;font-weight:600;" data-forgot-password>Forgot password?</button></p>' +
