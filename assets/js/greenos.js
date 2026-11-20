@@ -2,6 +2,8 @@
   "use strict";
 
   var SESS_KEY = "gl_greenos_session";
+  var LOGIN_ATTEMPTS = 4;
+  var LOGIN_RETRY_MS = 2500;
 
   function normEmail(v) {
     return String(v || "")
@@ -40,60 +42,164 @@
     return true;
   }
 
-  function loginViaApi(email, password, role, onSuccess, onError) {
+  function sleep(ms) {
+    return new Promise(function (resolve) {
+      setTimeout(resolve, ms);
+    });
+  }
+
+  function parseLoginPayload(res, text) {
+    var trimmed = String(text || "").trim();
+    if (!trimmed) {
+      return {
+        ok: false,
+        network: true,
+        message:
+          "GreenOS returned an empty response (HTTP " +
+          res.status +
+          "). The server may be restarting — try again in a moment."
+      };
+    }
+    try {
+      var data = JSON.parse(trimmed);
+      return { ok: true, data: data, status: res.status, httpOk: res.ok };
+    } catch (e) {
+      var looksHtml = /<!doctype html|<html|bad gateway|502|504/i.test(trimmed);
+      return {
+        ok: false,
+        network: true,
+        retryable: looksHtml || res.status >= 500 || res.status === 0,
+        message: looksHtml
+          ? "GreenOS is temporarily unavailable (server restarting). Retrying…"
+          : "GreenOS returned a non-JSON response (HTTP " +
+            res.status +
+            "). Try again shortly."
+      };
+    }
+  }
+
+  function postLogin(apiBaseUrl, email, password) {
+    return fetch(apiBaseUrl + "/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json"
+      },
+      body: JSON.stringify({
+        username: String(email || "").trim(),
+        email: String(email || "").trim(),
+        password: String(password || "")
+      })
+    }).then(function (res) {
+      return res.text().then(function (text) {
+        return { res: res, parsed: parseLoginPayload(res, text) };
+      });
+    });
+  }
+
+  function loginViaApi(email, password, role, onSuccess, onError, onStatus) {
     var cfg = getConfig();
     if (!cfg.apiBaseUrl) {
       onError("API not configured");
       return;
     }
-    fetch(cfg.apiBaseUrl + "/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        username: String(email || "").trim(),
-        password: String(password || "")
-      })
-    })
-      .then(function (res) {
-        return res.json().then(function (data) {
-          return { ok: res.ok, data: data };
-        });
-      })
-      .then(function (result) {
-        if (!result.ok || !result.data || !result.data.success) {
-          onError(
-            (result.data && result.data.message) ||
-              "Invalid email or password. Contact your administrator if you need access."
-          );
-          return;
-        }
-        var token = result.data.data && result.data.data.token;
-        var user = result.data.data && result.data.data.user;
-        var session = {
-          email: normEmail(user && user.username ? user.username : email),
-          name: user
-            ? String(user.firstName || "") + " " + String(user.lastName || "")
-            : normEmail(email),
-          role: String((user && user.role) || role || "").trim(),
-          loggedInAt: new Date().toISOString()
-        };
-        localStorage.setItem(SESS_KEY, JSON.stringify(session));
-        if (token && redirectToApp(token)) {
-          onSuccess(session);
-          return;
-        }
-        if (cfg.appUrl) {
-          window.location.href = cfg.appUrl;
-          onSuccess(session);
-          return;
-        }
-        onError("GreenOS app URL is not configured.");
-      })
-      .catch(function () {
-        onError(
-          "Could not reach GreenOS server. Try again later or contact your administrator."
+
+    var attempt = 0;
+
+    function failHard(message) {
+      var app = cfg.appUrl || "https://os.greengrouplogistics.com/";
+      onError(
+        message +
+          " Or open GreenOS directly: " +
+          app.replace(/\/$/, "") +
+          " — then use Sign Up / Sign in there."
+      );
+    }
+
+    function next() {
+      attempt += 1;
+      if (onStatus && attempt > 1) {
+        onStatus(
+          "GreenOS is waking up (attempt " +
+            attempt +
+            "/" +
+            LOGIN_ATTEMPTS +
+            ")…"
         );
-      });
+      }
+
+      postLogin(cfg.apiBaseUrl, email, password)
+        .then(function (result) {
+          var parsed = result.parsed;
+          if (!parsed.ok) {
+            if (parsed.retryable !== false && attempt < LOGIN_ATTEMPTS) {
+              if (onStatus) onStatus(parsed.message || "Retrying…");
+              return sleep(LOGIN_RETRY_MS).then(next);
+            }
+            failHard(
+              parsed.message ||
+                "Could not reach GreenOS server. Try again later or contact your administrator."
+            );
+            return;
+          }
+
+          var data = parsed.data;
+          if (!parsed.httpOk || !data || !data.success) {
+            onError(
+              (data && data.message) ||
+                "Invalid email or password. Contact your administrator if you need access."
+            );
+            return;
+          }
+
+          var token = data.data && data.data.token;
+          var user = data.data && data.data.user;
+          var session = {
+            email: normEmail(user && user.username ? user.username : email),
+            name: user
+              ? String(user.firstName || "") + " " + String(user.lastName || "")
+              : normEmail(email),
+            role: String((user && user.role) || role || "").trim(),
+            loggedInAt: new Date().toISOString()
+          };
+          try {
+            localStorage.setItem(SESS_KEY, JSON.stringify(session));
+          } catch (e) {
+            /* private mode — still redirect with token */
+          }
+          if (token && redirectToApp(token)) {
+            onSuccess(session);
+            return;
+          }
+          if (cfg.appUrl) {
+            window.location.href = cfg.appUrl;
+            onSuccess(session);
+            return;
+          }
+          onError("GreenOS app URL is not configured.");
+        })
+        .catch(function (err) {
+          if (attempt < LOGIN_ATTEMPTS) {
+            if (onStatus) {
+              onStatus(
+                "Could not reach GreenOS (network). Retrying " +
+                  attempt +
+                  "/" +
+                  LOGIN_ATTEMPTS +
+                  "…"
+              );
+            }
+            return sleep(LOGIN_RETRY_MS).then(next);
+          }
+          failHard(
+            "Could not reach GreenOS server" +
+              (err && err.message ? " (" + err.message + ")" : "") +
+              ". Try again later or contact your administrator."
+          );
+        });
+    }
+
+    next();
   }
 
   var GLGreenOS = {
@@ -195,6 +301,21 @@
         }
       }
 
+      function showErr(message) {
+        resetBtn();
+        if (err) {
+          err.hidden = false;
+          err.textContent = message;
+        }
+      }
+
+      function showStatus(message) {
+        if (err) {
+          err.hidden = false;
+          err.textContent = message;
+        }
+      }
+
       if (GLGreenOS.usesApi()) {
         loginViaApi(
           email,
@@ -203,13 +324,8 @@
           function () {
             resetBtn();
           },
-          function (message) {
-            resetBtn();
-            if (err) {
-              err.hidden = false;
-              err.textContent = message;
-            }
-          }
+          showErr,
+          showStatus
         );
         return;
       }
